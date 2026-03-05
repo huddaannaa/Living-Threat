@@ -1,5 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#06131a" />
+  <meta name="description" content="A living threat repository where real-world incidents are continuously mapped to ATT&CK tactics and techniques, in a Navigator-style view." />
+  <link rel="icon" href="https://news.rabitanoor.com/content/images/2024/10/1-2.png">
+  <title>Living MITRE Repository • Navigator-style Threat Mapping</title>
 
+  <style>
+    :root{
+      --bg0:#04080c; --bg1:#06131a;
+      --text:#d6f7ff;
 
+      --cyan:#00f5ff; --green:#77ffb0; --violet:#b58bff;
+      --amber:#ffcc66; --pink:#ff5a7a; --blue:#54a6ff; --orange:#ff7a59;
       --shadow: 0 14px 40px rgba(0,0,0,.46);
 
       --panelA: rgba(7,26,34,.78);
@@ -437,6 +452,14 @@
       padding:10px;
       margin-bottom:10px;
     }
+    .pathStrip.pinned{
+      position: fixed;
+      z-index: 30;
+      backdrop-filter: blur(6px);
+    }
+    .pathStripSpacer{
+      width:100%;
+    }
     .pathStrip.hotPanel{
       border-color: var(--hlRed);
       box-shadow: 0 0 0 1px var(--hlRed2), 0 0 34px var(--hlGlow);
@@ -656,7 +679,8 @@
       font-size:16px;
     }
     .modalBd{ padding:12px; overflow:auto; }
-    .modalTitle{ font-size:14px; font-weight:950; line-height:1.25; margin:0 0 8px; }
+    .modalTitle{ font-size:14px; font-weight:950; line-height:1.25; margin:0 0 8px; color:rgba(214,247,255,.96); }
+    .modalBd{ color:rgba(214,247,255,.90); }
     .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     @media (max-width: 860px){ .grid2{ grid-template-columns: 1fr; } }
 
@@ -900,6 +924,7 @@
 
         <button class="btn secondary mobileOnly" id="docsBtn">Docs</button>
 
+        <button class="btn secondary" id="shareBtn">Share</button>
         <button class="btn secondary" id="helpBtn">Help</button>
         <button class="btn secondary" id="aboutBtn">About</button>
 
@@ -942,6 +967,13 @@
           </div>
         </div>
 
+
+
+        <div class="box" id="prioBox">
+          <h3>Operational Priorities <span class="chip" id="prioChip">—</span></h3>
+          <div class="docList" id="prioList"></div>
+          <div class="muted" id="prioEmpty" style="display:none; margin-top:8px;">No priorities for current filters.</div>
+        </div>
         <div class="tabsRow desktopOnly">
           <button class="tabBtn active" id="tabBtnFocus" data-tab="focus">Focus</button>
           <button class="tabBtn" id="tabBtnDocs" data-tab="docs">Documents</button>
@@ -1137,6 +1169,7 @@ const state = {
 
   huntOn: true,
   pathOn: false,
+  pathPinned: true,
   packOn: true,
 
   sideTab: "focus",
@@ -1351,6 +1384,7 @@ async function pollHeartbeat(){
     const params = new URLSearchParams();
     if(loadedLatestSeq !== null && loadedLatestSeq !== undefined){
       params.set("since_seq", String(loadedLatestSeq));
+      if(loadedLatestTs) params.set("since_ts", loadedLatestTs);
     }else if(loadedLatestTs){
       params.set("since_ts", loadedLatestTs);
     }else{
@@ -1409,7 +1443,14 @@ async function bootstrapFromServer({reason="Load"} = {}){
   uiNow = uiNowParsed || new Date();
 
   const nowStr = fmtDate(data?.meta?.ui_now);
-  $("envChip").textContent = nowStr !== "—" ? `now=${nowStr}` : "now";
+  const mode = String(data?.meta?.ui_now_mode || "latest");
+  const fresh = data?.meta?.data_freshness || {};
+  const ageSec = Number(fresh?.latest_age_seconds);
+  const ageTxt = Number.isFinite(ageSec) ? `${Math.floor(ageSec/3600)}h` : "n/a";
+  const staleTxt = fresh?.is_stale ? "stale" : "fresh";
+  $("envChip").textContent = nowStr !== "—"
+    ? `mode=${mode} • now=${nowStr} • ${staleTxt}(${ageTxt})`
+    : `mode=${mode}`;
 
   loadedLatestTs = data?.meta?.latest_ts || null;
   loadedLatestSeq = (data?.meta?.latest_seq !== null && data?.meta?.latest_seq !== undefined)
@@ -1606,6 +1647,7 @@ function render(){
   buildSideFilters(docs);
   renderSelectedDocBox(selDocNow);
   renderAggBox(docs);
+  renderOperationalPriorities(docs);
   renderTechniqueFocus(docs, techStats);
   renderPathStrip(selDocNow);
   renderMatrix(docs, techStats, selDocNow);
@@ -1664,6 +1706,46 @@ function renderAggBox(docs){
     <div class="k">Top Tools</div><div class="v">${escapeHtml(topTools)}</div>
     <div class="k">Top CVEs</div><div class="v">${escapeHtml(topCVEs)}</div>
   `;
+}
+
+
+function renderOperationalPriorities(docs){
+  const host = $("prioList");
+  const empty = $("prioEmpty");
+  host.innerHTML = "";
+
+  const ranked = docs
+    .slice()
+    .sort((a,b)=> (Number(b.priority_score||0)-Number(a.priority_score||0)) || (Number(b.relevance_score||0)-Number(a.relevance_score||0)))
+    .slice(0,5);
+
+  $("prioChip").textContent = `${ranked.length}`;
+  empty.style.display = ranked.length ? "none" : "block";
+
+  for(const d of ranked){
+    const item = document.createElement("div");
+    item.className = "docItem" + (state.selectedDocId===d.id ? " active" : "");
+    const tags = Array.isArray(d.operational_tags) ? d.operational_tags : [];
+    const next = (d.Detection_Rules_And_Indicators||[])[0] || (d.Post_Incident_Recommendations||[])[0] || "Review attack path runbook";
+    item.innerHTML = `
+      <div class="row">
+        <div class="t">${sevPill(d.Severity)} ${escapeHtml(shortTitle(d.Title, 56))}</div>
+        <div class="ts">P${Number(d.priority_score||0)} • R${Number(d.relevance_score||0)}</div>
+      </div>
+      <div class="m">${escapeHtml(shortTitle(next, 130))}</div>
+      <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+        ${tags.slice(0,3).map(t=>`<span class="pill amber">${escapeHtml(t)}</span>`).join("") || `<span class="pill">General</span>`}
+      </div>
+    `;
+    item.addEventListener("click", ()=>{
+      state.selectedDocId = d.id;
+      state.huntOn = true;
+      $("hunt").checked = true;
+      syncHash();
+      render();
+    });
+    host.appendChild(item);
+  }
 }
 
 /* Selected doc box */
@@ -1836,7 +1918,7 @@ function renderPathStrip(selDoc){
   }
 
   const strip = document.createElement("div");
-  strip.className = "pathStrip hotPanel";
+  strip.className = `pathStrip hotPanel ${state.pathPinned ? "pinned" : ""}`.trim();
   strip.innerHTML = `
     <div class="row">
       <div class="title">
@@ -1847,6 +1929,7 @@ function renderPathStrip(selDoc){
         <span class="chip">age ${ageDaysFrom(selDoc.Timestamp)}d</span>
         <span class="chip">tech ${(selDoc.Techniques||[]).length}</span>
         <button class="btn secondary sm" id="openDocFromPath">Open Doc</button>
+        <button class="btn secondary sm" id="togglePin">${state.pathPinned ? "Unpin" : "Pin"} Attack Path</button>
         <button class="btn sm" id="togglePack">${state.packOn ? "Hide" : "Show"} Hunt Pack</button>
       </div>
     </div>
@@ -1868,6 +1951,20 @@ function renderPathStrip(selDoc){
     <div id="huntPackHost"></div>
   `;
   host.appendChild(strip);
+
+  if(state.pathPinned){
+    const topbar = document.querySelector(".topbar");
+    const topOffset = (topbar ? topbar.offsetHeight : 70) + 8;
+    const rect = host.getBoundingClientRect();
+    strip.style.top = `${topOffset}px`;
+    strip.style.left = `${rect.left}px`;
+    strip.style.width = `${rect.width}px`;
+
+    const spacer = document.createElement("div");
+    spacer.className = "pathStripSpacer";
+    spacer.style.height = `${strip.offsetHeight}px`;
+    host.insertBefore(spacer, strip);
+  }
 
   const stagesHost = strip.querySelector("#stagesHost");
   for(const stage of STAGE_ORDER){
@@ -1906,6 +2003,11 @@ function renderPathStrip(selDoc){
   });
 
   strip.querySelector("#openDocFromPath").addEventListener("click", ()=> openDocModal(selDoc));
+  strip.querySelector("#togglePin").addEventListener("click", ()=>{
+    state.pathPinned = !state.pathPinned;
+    syncHash();
+    render();
+  });
   strip.querySelector("#togglePack").addEventListener("click", ()=>{
     state.packOn = !state.packOn;
     syncHash();
@@ -2373,6 +2475,17 @@ $("switcherModal").addEventListener("keydown", (e)=>{
   if(e.key === "Enter"){ e.preventDefault(); items[switcherIdx].click(); }
 });
 
+/* Share */
+$("shareBtn").addEventListener("click", async ()=>{
+  try{
+    const shareUrl = `${location.origin}${location.pathname}${location.hash || ""}`;
+    await navigator.clipboard.writeText(shareUrl);
+    toast("Share link copied");
+  }catch{
+    toast("Unable to copy link");
+  }
+});
+
 /* Help/About */
 $("helpBtn").addEventListener("click", ()=> $("helpModal").showModal());
 $("aboutBtn").addEventListener("click", ()=> $("aboutModal").showModal());
@@ -2419,6 +2532,7 @@ $("clearAll").addEventListener("click", ()=>{
     actor:"ALL", tool:"ALL",
     selectedDocId:null, selectedTechId:null,
     huntOn:true, pathOn:false,
+    pathPinned:true,
     packOn:true,
     sideTab:"focus",
     autoCheck: $("autoCheck").checked,
@@ -2496,6 +2610,7 @@ function syncHash(){
   p.set("tool", state.tool);
   p.set("hunt", state.huntOn ? "1" : "0");
   p.set("path", state.pathOn ? "1" : "0");
+  p.set("pathpin", state.pathPinned ? "1" : "0");
   p.set("pack", state.packOn ? "1" : "0");
   if(state.selectedDocId) p.set("doc", state.selectedDocId);
   if(state.selectedTechId) p.set("tech", state.selectedTechId);
@@ -2511,6 +2626,7 @@ function loadHash(){
   state.tool = p.get("tool") || "ALL";
   state.huntOn = (p.get("hunt") || "1") === "1";
   state.pathOn = (p.get("path") || "0") === "1";
+  state.pathPinned = (p.get("pathpin") || "1") === "1";
   state.packOn = (p.get("pack") || "1") === "1";
   state.selectedDocId = p.get("doc");
   state.selectedTechId = p.get("tech");
@@ -2532,6 +2648,7 @@ function loadHash(){
   }
 }
 window.addEventListener("hashchange", ()=>{ loadHash(); render(); });
+window.addEventListener("resize", ()=>{ if(state.pathOn) render(); });
 
 /* Init */
 (async function init(){
