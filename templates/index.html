@@ -1,5 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#06131a" />
+  <meta name="description" content="A living threat repository where real-world incidents are continuously mapped to ATT&CK tactics and techniques, in a Navigator-style view." />
+  <link rel="canonical" href="https://living-threat.rabitanoor.com" />
 
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://living-threat.rabitanoor.com" />
+  <meta property="og:title" content="Living Threat Repository" />
+  <meta property="og:description" content="Asset-relevant threat intel mapped to ATT&CK with evidence." />
 
+  <meta property="og:image" content="https://repo.researchbus.com/api/public/dl/0-sI5gSY/RBTN/LOGO/LT.png" />
+  <meta property="og:image:secure_url" content="https://repo.researchbus.com/api/public/dl/0-sI5gSY/RBTN/LOGO/LT.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://repo.researchbus.com/api/public/dl/0-sI5gSY/RBTN/LOGO/LT.png" />
+  <link rel="icon" href="https://news.rabitanoor.com/content/images/2024/10/1-2.png">
+  <title>Living MITRE Repository â€¢ Navigator-style Threat Mapping</title>
+
+  <style>
+    :root{
+      --bg0:#04080c; --bg1:#06131a;
+      --text:#d6f7ff;
+
+      --cyan:#00f5ff; --green:#77ffb0; --violet:#b58bff;
+      --amber:#ffcc66; --pink:#ff5a7a; --blue:#54a6ff; --orange:#ff7a59;
       --shadow: 0 14px 40px rgba(0,0,0,.46);
 
       --panelA: rgba(7,26,34,.78);
@@ -84,6 +114,11 @@
       box-shadow: var(--shadow);
     }
     .toggle{ border-color: rgba(181,139,255,.18); background: rgba(16,10,28,.28); }
+    .searchCtl{
+      border-color: rgba(255, 90, 122, .56);
+      box-shadow: 0 0 0 1px rgba(255,90,122,.24), 0 0 18px rgba(255,214,97,.20);
+      animation: searchPulse 1.4s infinite;
+    }
 
     .ctl label, .rangeCtl label{
       font-family:var(--mono);
@@ -98,6 +133,14 @@
       outline:none;
       font-size:13px;
       min-width: 120px;
+    }
+    select option{ background:#081019; color:#d6f7ff; }
+    .fctl select,
+    .fctl select:focus{
+      background: rgba(3,9,16,.95);
+      color:#d6f7ff;
+      border-radius:8px;
+      padding:4px 6px;
     }
     input[type="text"]::placeholder{ color:rgba(214,247,255,.45); }
 
@@ -154,6 +197,13 @@
     }
     .btn.sm{ padding:7px 10px; font-size:12px; }
     .btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+    #pathBtn{
+      border-color: rgba(255, 132, 132, .75);
+      box-shadow: 0 0 0 1px rgba(255,132,132,.28), 0 0 22px rgba(255,214,97,.22);
+      background: linear-gradient(180deg, rgba(255,132,132,.20), rgba(255,132,132,.08));
+      font-weight:700;
+    }
+    #refreshBtn{ font-weight:700; }
 
     .toggle input{ accent-color: var(--violet); }
     .toggle span{ font-size:12.5px; color:rgba(214,247,255,.86); white-space:nowrap; }
@@ -180,6 +230,20 @@
     .badge.hot .dot{
       background: rgba(255, 132, 132, .95);
       box-shadow: 0 0 18px rgba(255, 214, 97, .32);
+      animation: pulse 1s infinite;
+    }
+    .liveDot{
+      width:8px; height:8px; border-radius:50%; display:inline-block;
+      background:#77ffb0; box-shadow:0 0 16px rgba(119,255,176,.6);
+      animation: pulse 1.4s infinite;
+    }
+    .beacon{ animation: pulse 1.2s infinite; }
+    .recentBadge{
+      border-color: rgba(255, 90, 122, .72);
+      background: rgba(255,90,122,.24);
+      color: #ffd5df;
+      animation: recentAlert 1s infinite;
+      box-shadow: 0 0 0 1px rgba(255,90,122,.30), 0 0 20px rgba(255, 80, 116, .35);
     }
 
     .main{
@@ -240,6 +304,36 @@
     @media (max-width:1060px){
       .matrixBody{ height:auto; min-height:unset; }
     }
+    .matrixNavMap{
+      position: sticky;
+      top: 0;
+      z-index: 6;
+      border:1px solid rgba(0,245,255,.16);
+      background: rgba(2,12,18,.78);
+      border-radius: 12px;
+      padding:8px;
+      margin-bottom:10px;
+      backdrop-filter: blur(8px);
+    }
+    .matrixNavMap .hd{
+      font-family:var(--mono);
+      font-size:10px;
+      color:rgba(214,247,255,.70);
+      margin-bottom:6px;
+    }
+    .matrixNavTrack{ display:flex; gap:6px; flex-wrap:wrap; }
+    .matrixNavDot{
+      border:1px solid rgba(0,245,255,.16);
+      border-radius:999px;
+      padding:3px 8px;
+      font-size:10px;
+      font-family:var(--mono);
+      background: rgba(0,245,255,.05);
+      color:rgba(214,247,255,.82);
+      cursor:pointer;
+    }
+    .matrixNavDot:hover{ border-color: rgba(0,245,255,.34); }
+    .matrixNavDot.hot{ background: rgba(255,90,122,.16); border-color: rgba(255,90,122,.42); color:#ffd8e1; }
 
     .sidePanel{ background: var(--panelB); border-color: rgba(181,139,255,.22); }
     .sidePanel .panelHd{
@@ -264,6 +358,11 @@
       margin-bottom:10px;
       overflow:hidden;
     }
+    .box.selDocPanel{ border-color: rgba(0,245,255,.28); background: linear-gradient(180deg, rgba(0,245,255,.09), rgba(0,0,0,.14)); }
+    .box.aggPanel{ border-color: rgba(119,255,176,.28); background: linear-gradient(180deg, rgba(119,255,176,.10), rgba(0,0,0,.14)); }
+    .box.prioPanel{ border-color: rgba(255,90,122,.30); background: linear-gradient(180deg, rgba(255,90,122,.12), rgba(0,0,0,.14)); }
+    .box.focusPanel{ border-color: rgba(181,139,255,.30); background: linear-gradient(180deg, rgba(181,139,255,.11), rgba(0,0,0,.14)); }
+    .box.docsPanel{ border-color: rgba(255,204,102,.30); background: linear-gradient(180deg, rgba(255,204,102,.11), rgba(0,0,0,.14)); }
     .box h3{
       margin:0 0 8px;
       font-size:12.5px; letter-spacing:.2px;
@@ -436,6 +535,21 @@
       border-radius: 14px;
       padding:10px;
       margin-bottom:10px;
+    }
+    .pathStrip.pinned{
+      position: fixed;
+      z-index: 30;
+      backdrop-filter: blur(6px);
+      max-height: calc(100vh - 120px);
+      overflow:auto;
+    }
+    .pathStrip.pinned .huntPack{
+      max-height: 46vh;
+      overflow:auto;
+      padding-right:6px;
+    }
+    .pathStripSpacer{
+      width:100%;
     }
     .pathStrip.hotPanel{
       border-color: var(--hlRed);
@@ -616,6 +730,51 @@
       box-shadow: 0 0 18px rgba(255,90,122,.25);
     }
 
+    .miniMap{
+      position: fixed;
+      right: 14px;
+      bottom: 16px;
+      z-index: 40;
+      width: 160px;
+      border-radius: 14px;
+      border:1px solid rgba(0,245,255,.20);
+      background: rgba(2,8,14,.86);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      padding:8px;
+    }
+    .miniMapHd{
+      font-family:var(--mono);
+      font-size:10px;
+      color:rgba(214,247,255,.72);
+      margin-bottom:6px;
+      display:flex; justify-content:space-between; align-items:center;
+    }
+    .miniTrack{ display:flex; flex-direction:column; gap:4px; }
+    .miniRow{
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      min-height:16px;
+      padding:2px 6px;
+      cursor:pointer;
+      font-size:10px;
+      color:rgba(214,247,255,.78);
+      display:flex; align-items:center; justify-content:space-between;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    .miniRow:hover{ border-color: rgba(0,245,255,.35); }
+    .miniRow.active{
+      border-color: rgba(0,245,255,.55);
+      box-shadow: 0 0 0 1px rgba(0,245,255,.22), 0 0 16px rgba(0,245,255,.16);
+    }
+    .miniRow[data-tone="matrix"]{ background: rgba(0,245,255,.10); }
+    .miniRow[data-tone="side"]{ background: rgba(181,139,255,.12); }
+    .miniRow[data-tone="priority"]{ background: rgba(255,90,122,.14); }
+    .miniRow[data-tone="docs"]{ background: rgba(255,204,102,.14); }
+    .miniRow small{ opacity:.72; }
+    @media (max-width:1060px){ .miniMap{ display:none; } }
+
     /* dialogs */
     dialog{
       border:none;
@@ -641,6 +800,7 @@
     }
     .modalHd{
       padding:12px 12px 10px;
+      color:rgba(214,247,255,.94);
       border-bottom:1px solid rgba(0,245,255,.12);
       display:flex; justify-content:space-between; align-items:center; gap:10px;
       background: linear-gradient(180deg, rgba(0,245,255,.06), rgba(0,0,0,.0));
@@ -656,7 +816,8 @@
       font-size:16px;
     }
     .modalBd{ padding:12px; overflow:auto; }
-    .modalTitle{ font-size:14px; font-weight:950; line-height:1.25; margin:0 0 8px; }
+    .modalTitle{ font-size:14px; font-weight:950; line-height:1.25; margin:0 0 8px; color:rgba(214,247,255,.96); }
+    .modalBd{ color:rgba(214,247,255,.90); }
     .grid2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     @media (max-width: 860px){ .grid2{ grid-template-columns: 1fr; } }
 
@@ -703,6 +864,22 @@
       transition: width .18s ease;
     }
     .loaderBd{ padding:12px; }
+    .loaderUsagePanel{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.16);
+      border-radius: 12px;
+      padding:10px;
+      margin-bottom:10px;
+      max-height: 180px;
+      overflow:auto;
+    }
+    .loaderUsagePanel p{
+      margin:0 0 8px;
+      font-size:12px;
+      line-height:1.45;
+      color:rgba(214,247,255,.86);
+    }
+    .loaderUsagePanel p:last-child{ margin-bottom:0; }
     .loaderMsg{ margin-top:10px; font-size:12px; color:rgba(214,247,255,.78); line-height:1.35; }
 
     /* Mobile docs drawer */
@@ -755,11 +932,12 @@
     }
     .switcherHd{
       padding:12px 12px 10px;
+      color:rgba(214,247,255,.94);
       border-bottom:1px solid rgba(0,245,255,.12);
       display:flex; justify-content:space-between; align-items:center; gap:10px;
       background: linear-gradient(180deg, rgba(0,245,255,.06), rgba(0,0,0,.0));
     }
-    .switcherBd{ padding:12px; overflow:auto; }
+    .switcherBd{ padding:12px; overflow:auto; color:rgba(214,247,255,.90); }
     .switcherInput{
       width:100%;
       border-radius: 12px;
@@ -792,7 +970,7 @@
       box-shadow: 0 0 0 1px var(--hlRed2), 0 0 28px var(--hlGlow);
     }
     .swTop{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
-    .swTitle{ font-weight:900; font-size:12.6px; line-height:1.2; }
+    .swTitle{ font-weight:900; font-size:12.6px; line-height:1.2; color:rgba(230,245,255,.94); }
     .swTs{ font-family:var(--mono); font-size:11px; color:rgba(214,247,255,.58); white-space:nowrap; }
     .swSnip{ margin-top:6px; font-size:12px; color:rgba(214,247,255,.76); line-height:1.35; }
 
@@ -819,6 +997,24 @@
       z-index:80;
     }
     .toast.show{ opacity:1; }
+
+    @keyframes recentAlert{
+      0%{ opacity:1; box-shadow: 0 0 0 1px rgba(255,90,122,.28), 0 0 8px rgba(255,80,116,.20); }
+      50%{ opacity:.35; box-shadow: 0 0 0 1px rgba(255,90,122,.70), 0 0 26px rgba(255,80,116,.56); }
+      100%{ opacity:1; box-shadow: 0 0 0 1px rgba(255,90,122,.28), 0 0 8px rgba(255,80,116,.20); }
+    }
+
+    @keyframes searchPulse{
+      0%{ box-shadow: 0 0 0 1px rgba(255,90,122,.24), 0 0 12px rgba(255,214,97,.14); }
+      50%{ box-shadow: 0 0 0 1px rgba(255,90,122,.55), 0 0 28px rgba(255,214,97,.30); }
+      100%{ box-shadow: 0 0 0 1px rgba(255,90,122,.24), 0 0 12px rgba(255,214,97,.14); }
+    }
+
+    @keyframes pulse{
+      0%{ transform:scale(1); opacity:1; }
+      50%{ transform:scale(1.05); opacity:.72; }
+      100%{ transform:scale(1); opacity:1; }
+    }
   </style>
 </head>
 
@@ -831,8 +1027,9 @@
       <span class="chip" id="loaderPct">0%</span>
     </div>
     <div class="loaderBd">
+      <div class="loaderUsagePanel" id="loaderUsagePanel"></div>
       <div class="progressWrap"><div class="progressBar" id="loaderBar"></div></div>
-      <div class="loaderMsg" id="loaderMsg">Starting…</div>
+      <div class="loaderMsg" id="loaderMsg">Startingâ€¦</div>
       <div class="muted" style="font-size:11px; margin-top:10px;">
         Tip: Press <b>Ctrl+K</b> to jump to a document.
       </div>
@@ -844,22 +1041,29 @@
   <header class="topbar">
     <div class="topbarInner">
       <div class="brand">
-        <div class="title"><span class="dot"></span>Living MITRE Repository <span class="chip" id="envChip">connecting…</span></div>
+        <div class="title"><span class="dot"></span>Living MITRE Repository <span class="chip" id="envChip">connectingâ€¦</span><span class="chip" title="Live status indicator"><span class="liveDot"></span> live</span></div>
         <div class="sub">
           A living threat repository where real-world incidents are continuously mapped to <b>ATT&CK tactics</b> and <b>techniques</b>, in a Navigator-style view.
-          Select a document to enter <b>Hunt Mode</b>. Toggle <b>Attack Path</b> to see phases and the hunt pack.
+          <b>Recommended flow:</b> 1) Filter first (search + time + severity + facets), 2) pick a document, 3) enter Hunt Mode, 4) open Attack Path to understand stage progression,
+          5) expand Hunt Pack for detections/remediation and pivots, 6) share the view with your SOC team for coordinated response.
+          This helps analysts move from noisy intel to asset-relevant, actionable decisions faster.
         </div>
       </div>
 
       <div class="bar">
+        <div class="ctl searchCtl" title="Search filters on doc_summary only">
+          <label>Search</label>
+          <input id="q" type="text" placeholder="doc_summary containsâ€¦" />
+        </div>
+
         <div class="rangeCtl">
           <label>Range</label>
-          <input id="range" type="range" min="1" max="365" value="90" step="1" />
-          <div class="v" id="rangeV">90d</div>
+          <input id="range" type="range" min="1" max="365" value="7" step="1" />
+          <div class="v" id="rangeV">7d</div>
           <div class="presets" id="presets">
-            <div class="pbtn" data-days="7">7d</div>
+            <div class="pbtn active" data-days="7">7d</div>
             <div class="pbtn" data-days="30">30d</div>
-            <div class="pbtn active" data-days="90">90d</div>
+            <div class="pbtn" data-days="90">90d</div>
             <div class="pbtn" data-days="180">180d</div>
             <div class="pbtn" data-days="365">365d</div>
             <div class="pbtn" data-days="ALL">All</div>
@@ -875,19 +1079,14 @@
           </select>
         </div>
 
-        <div class="ctl" title="Search filters on doc_summary only">
-          <label>Search</label>
-          <input id="q" type="text" placeholder="doc_summary contains…" />
-        </div>
-
         <div class="toggle" title="Hunt Mode highlights techniques used by the selected document">
           <input type="checkbox" id="hunt" checked />
           <span>Hunt Mode</span>
         </div>
 
-        <button class="btn secondary" id="pathBtn" disabled>Attack Path</button>
+        <button class="btn secondary beacon" id="pathBtn" disabled title="Critical: open attack path and hunt pack workflow">Attack Path</button>
 
-        <button class="btn" id="refreshBtn">Refresh</button>
+        <button class="btn beacon" id="refreshBtn" title="Critical: refresh latest intelligence dataset">Refresh</button>
         <span class="badge" id="newBadge" style="display:none;">
           <span class="dot"></span>
           <span id="newBadgeTxt">New</span>
@@ -900,8 +1099,9 @@
 
         <button class="btn secondary mobileOnly" id="docsBtn">Docs</button>
 
-        <button class="btn secondary" id="helpBtn">Help</button>
-        <button class="btn secondary" id="aboutBtn">About</button>
+        <button class="btn secondary" id="shareBtn">Share</button>
+        <button class="btn secondary" id="helpBtn" title="Open platform guide">Help</button>
+        <button class="btn secondary" id="aboutBtn" title="About this platform">About</button>
 
         <button class="btn danger" id="clearAll">Reset</button>
       </div>
@@ -911,11 +1111,15 @@
   <main class="main">
     <section class="panel matrixPanel" id="matrixPanel">
       <div class="panelHd">
-        <div class="h">Navigator <span class="chip" id="matrixMeta">—</span></div>
-        <div class="meta" id="selMeta">Loading…</div>
+        <div class="h">Navigator <span class="chip" id="matrixMeta">â€”</span></div>
+        <div class="meta" id="selMeta">Loadingâ€¦</div>
       </div>
 
       <div class="matrixBody">
+        <div class="matrixNavMap" id="matrixNavMap">
+          <div class="hd">Navigator Minimap â€¢ click tactic to jump</div>
+          <div class="matrixNavTrack" id="matrixNavTrack"></div>
+        </div>
         <div id="pathStripHost"></div>
         <div class="tacticGrid" id="matrix"></div>
         <div class="muted" id="emptyMatrix" style="display:none; padding:10px 2px;">
@@ -926,37 +1130,50 @@
 
     <aside class="panel sidePanel" id="sidePanel">
       <div class="panelHd">
-        <div class="h">Evidence Sidebar <span class="chip" id="sideMeta">—</span></div>
+        <div class="h">Evidence Sidebar <span class="chip" id="sideMeta">â€”</span></div>
         <div class="meta"><span class="chip" id="focusChip">Technique: none</span></div>
       </div>
 
-      <div class="sideBody">
-        <div class="box" id="selDocBox" style="display:none;"></div>
+      <div class="sideBody" id="sideBody">
+        <div class="box selDocPanel" id="selDocBox" style="display:none;"></div>
 
-        <div class="box" id="aggBox">
-          <h3>Aggregations <span class="chip" id="aggChip">—</span></h3>
+        <div class="box aggPanel" id="aggBox">
+          <h3>Aggregations <span class="chip" id="aggChip">â€”</span></h3>
           <div class="kv" id="aggKv"></div>
           <div class="filters">
-            <div class="fctl"><label>Actor</label><select id="actorF"></select></div>
-            <div class="fctl"><label>Tool</label><select id="toolF"></select></div>
+            <div class="fctl"><label>Actor</label><select id="actorF" title="Filter by actor relevant to current dataset"></select></div>
+            <div class="fctl"><label>Tool</label><select id="toolF" title="Filter by tools/malware present in current dataset"></select></div>
+            <div class="fctl"><label>Data Risk</label><select id="dataRiskF" title="Filter by data types at risk"></select></div>
+            <div class="fctl"><label>Country</label><select id="countryF" title="Filter by extracted country"></select></div>
+            <div class="fctl"><label>Breach Type</label><select id="breachTypeF" title="Filter by breach type"></select></div>
+            <div class="fctl"><label>Sector</label><select id="sectorF" title="Filter by sector"></select></div>
+            <div class="fctl"><label>Software</label><select id="softwareF" title="Filter by software"></select></div>
+            <div class="fctl"><label>Access Vector</label><select id="accessVectorF" title="Filter by access vectors"></select></div>
           </div>
         </div>
 
+
+
+        <div class="box prioPanel" id="prioBox">
+          <h3>Operational Priorities <span class="chip" id="prioChip">â€”</span></h3>
+          <div class="docList" id="prioList"></div>
+          <div class="muted" id="prioEmpty" style="display:none; margin-top:8px;">No priorities for current filters.</div>
+        </div>
         <div class="tabsRow desktopOnly">
           <button class="tabBtn active" id="tabBtnFocus" data-tab="focus">Focus</button>
           <button class="tabBtn" id="tabBtnDocs" data-tab="docs">Documents</button>
         </div>
 
         <div class="tabPane active" id="tabFocus">
-          <div class="box" id="focusBox">
-            <h3>Technique Focus <span class="chip" id="focusCount">—</span></h3>
+          <div class="box focusPanel" id="focusBox">
+            <h3>Technique Focus <span class="chip" id="focusCount">â€”</span></h3>
             <div class="kv" id="focusKv"></div>
           </div>
         </div>
 
         <div class="tabPane desktopOnly" id="tabDocs">
-          <div class="box">
-            <h3>Documents <span class="chip" id="docCount">—</span></h3>
+          <div class="box docsPanel" id="docsBox">
+            <h3>Documents <span class="chip" id="docCount">â€”</span></h3>
             <div class="docList" id="docList"></div>
             <div class="muted" id="emptyDocs" style="display:none; margin-top:8px;">No documents match the current filters.</div>
           </div>
@@ -964,14 +1181,29 @@
       </div>
     </aside>
   </main>
+
+  <nav class="miniMap" id="miniMap" aria-label="Page minimap">
+    <div class="miniMapHd">
+      <span>MINIMAP</span>
+      <small>Overview</small>
+    </div>
+    <div class="miniTrack" id="miniTrack">
+      <button class="miniRow" data-target="matrixPanel" data-tone="matrix">Navigator <small>left</small></button>
+      <button class="miniRow" data-target="pathStripHost" data-tone="matrix">Attack Path <small>top</small></button>
+      <button class="miniRow" data-target="aggBox" data-tone="side">Aggregations <small>side</small></button>
+      <button class="miniRow" data-target="prioBox" data-tone="priority">Priorities <small>side</small></button>
+      <button class="miniRow" data-target="focusBox" data-tone="side">Focus <small>side</small></button>
+      <button class="miniRow" data-target="docsBox" data-tone="docs">Documents <small>side</small></button>
+    </div>
+  </nav>
 </div>
 
 <!-- DOC MODAL -->
 <dialog id="docModal">
   <div class="modal">
     <div class="modalHd">
-      <div class="h">Document Details <span class="chip" id="modalChip">—</span></div>
-      <button class="x" id="closeModal">×</button>
+      <div class="h">Document Details <span class="chip" id="modalChip">â€”</span></div>
+      <button class="x" id="closeModal">Ã—</button>
     </div>
     <div class="modalBd" id="modalBody"></div>
   </div>
@@ -982,13 +1214,13 @@
   <div class="modal">
     <div class="modalHd">
       <div class="h">Help & Guide <span class="chip">Living MITRE Repository</span></div>
-      <button class="x" id="closeHelp">×</button>
+      <button class="x" id="closeHelp">Ã—</button>
     </div>
     <div class="modalBd">
       <h2 class="modalTitle">What this platform does</h2>
       <div class="blockquote">
         A living threat repository: real-world incidents and write-ups are continuously mapped to ATT&CK tactics and techniques.
-        The UI is designed for analyst flow — report → techniques → hunt/detect → pivots.
+        The UI is designed for analyst flow â€” report â†’ techniques â†’ hunt/detect â†’ pivots.
       </div>
 
       <div class="hr"></div>
@@ -1020,14 +1252,24 @@
 
       <h2 class="modalTitle">Updates / performance</h2>
       <div class="blockquote">
-        Refresh loads the latest dataset (BOOTSTRAP_SIZE). “New docs” badge uses a light heartbeat poll.
-        No automatic full refresh loop — avoids reloading thousands of docs repeatedly.
+        Refresh loads the latest dataset (BOOTSTRAP_SIZE). â€œNew docsâ€ badge uses a light heartbeat poll.
+        No automatic full refresh loop â€” avoids reloading thousands of docs repeatedly.
+      </div>
+
+      <div class="hr"></div>
+
+      <h2 class="modalTitle">How to use this efficiently</h2>
+      <div class="blockquote">
+        1) Start with <b>Operational Priorities</b> to identify top items quickly.<br/>
+        2) Select a document and open <b>Attack Path</b> to see stage-by-stage guidance.<br/>
+        3) Use <b>Actor</b>/<b>Tool</b> filters and <b>Search</b> to narrow to your environment.<br/>
+        4) Use <b>Share</b> to copy your exact filtered state for team collaboration.
       </div>
 
       <div class="hr"></div>
 
       <div class="muted" style="font-size:11px; line-height:1.4;">
-        MITRE ATT&CK® is a registered trademark of The MITRE Corporation.
+        MITRE ATT&CKÂ® is a registered trademark of The MITRE Corporation.
         This project is not affiliated with or endorsed by MITRE.
       </div>
     </div>
@@ -1039,13 +1281,13 @@
   <div class="modal">
     <div class="modalHd">
       <div class="h">About <span class="chip">Open Source</span></div>
-      <button class="x" id="closeAbout">×</button>
+      <button class="x" id="closeAbout">Ã—</button>
     </div>
     <div class="modalBd">
       <h2 class="modalTitle">The project</h2>
       <div class="blockquote">
         Living MITRE Repository is built for practical threat work: stable technique IDs, evidence you can review quickly,
-        and mappings that stay readable when you’re moving fast.
+        and mappings that stay readable when youâ€™re moving fast.
       </div>
 
       <div class="hr"></div>
@@ -1060,7 +1302,7 @@
       <div class="hr"></div>
 
       <div class="muted" style="font-size:11px; line-height:1.4;">
-        MITRE ATT&CK® is a registered trademark of The MITRE Corporation.
+        MITRE ATT&CKÂ® is a registered trademark of The MITRE Corporation.
         This project is not affiliated with or endorsed by MITRE.
       </div>
     </div>
@@ -1071,8 +1313,8 @@
 <div class="drawerBackdrop" id="drawerBackdrop" aria-hidden="true">
   <div class="drawer">
     <div class="drawerHd">
-      <div class="h">Documents <span class="chip" id="docCountDrawer">—</span></div>
-      <button class="x" id="closeDrawer">×</button>
+      <div class="h">Documents <span class="chip" id="docCountDrawer">â€”</span></div>
+      <button class="x" id="closeDrawer">Ã—</button>
     </div>
     <div class="drawerBd">
       <div class="docList" id="docListDrawer"></div>
@@ -1086,13 +1328,13 @@
   <div class="switcherWrap">
     <div class="switcherHd">
       <b>Quick Switcher</b>
-      <button class="x" id="closeSwitcher">×</button>
+      <button class="x" id="closeSwitcher">Ã—</button>
     </div>
     <div class="switcherBd">
-      <input id="switcherQ" class="switcherInput" type="text" placeholder="Type to search docs (title + doc_summary)…" autocomplete="off" />
+      <input id="switcherQ" class="switcherInput" type="text" placeholder="Type to search docs (title + doc_summary)â€¦" autocomplete="off" />
       <div class="switcherHint">
         <span class="chip">Enter: select</span>
-        <span class="chip">↑/↓: move</span>
+        <span class="chip">â†‘/â†“: move</span>
         <span class="chip">Esc: close</span>
         <span class="chip">Respects current filters</span>
       </div>
@@ -1125,19 +1367,26 @@ const STAGE_COL = {
 };
 
 const state = {
-  rangeDays: 90,
+  rangeDays: 7,
   allTime: false,
   sevMin: "ALL",
   q: "",
   actor: "ALL",
   tool: "ALL",
+  dataRisk: "ALL",
+  country: "ALL",
+  breachType: "ALL",
+  sector: "ALL",
+  software: "ALL",
+  accessVector: "ALL",
 
   selectedDocId: null,
   selectedTechId: null,
 
   huntOn: true,
   pathOn: false,
-  packOn: true,
+  pathPinned: true,
+  packOn: false,
 
   sideTab: "focus",
 
@@ -1195,7 +1444,7 @@ function parseDateSafe(iso){
 
 function fmtDate(iso){
   const d = parseDateSafe(iso);
-  if(!d) return "—";
+  if(!d) return "â€”";
   const yyyy = d.getUTCFullYear();
   const mm = String(d.getUTCMonth()+1).padStart(2,"0");
   const dd = String(d.getUTCDate()).padStart(2,"0");
@@ -1204,7 +1453,7 @@ function fmtDate(iso){
 
 function shortTitle(s, max=22){
   s = String(s||"");
-  return s.length>max ? (s.slice(0,max-1)+"…") : s;
+  return s.length>max ? (s.slice(0,max-1)+"â€¦") : s;
 }
 
 function ageDaysFrom(iso){
@@ -1212,6 +1461,20 @@ function ageDaysFrom(iso){
   if(!d) return 0;
   const delta = uiNow.getTime() - d.getTime();
   return Math.max(0, Math.floor(delta / (24*60*60*1000)));
+}
+function ageHoursFrom(iso){
+  const d = parseDateSafe(iso);
+  if(!d) return 999999;
+  const delta = uiNow.getTime() - d.getTime();
+  return Math.max(0, Math.floor(delta / (60*60*1000)));
+}
+function ageBadgeFrom(iso){
+  const hours = ageHoursFrom(iso);
+  if(hours >= 24) return `${Math.floor(hours/24)}d`;
+  return `${hours}h`;
+}
+function isRecent24h(doc){
+  return ageHoursFrom(doc?.Timestamp) <= 24;
 }
 
 function sevPass(doc){
@@ -1245,13 +1508,36 @@ function toolPass(doc){
   if(state.tool==="ALL") return true;
   return (doc.Tools||[]).includes(state.tool);
 }
+function docFacetVals(doc){
+  const victim = doc.Victim || {};
+  const ents = doc.Extracted_Entities || {};
+  return {
+    dataRisk: asArray(victim.Data_Types_At_Risk),
+    country: asArray(ents.Countries),
+    breachType: asArray(ents.Breach_Types),
+    sector: asArray(ents.Sectors),
+    software: asArray(ents.Software),
+    accessVector: asArray(victim.Access_Vectors),
+  };
+}
+function matchFacet(list, val){ return val==="ALL" ? true : asArray(list).includes(val); }
+function facetPass(doc){
+  const f = docFacetVals(doc);
+  return matchFacet(f.dataRisk, state.dataRisk)
+    && matchFacet(f.country, state.country)
+    && matchFacet(f.breachType, state.breachType)
+    && matchFacet(f.sector, state.sector)
+    && matchFacet(f.software, state.software)
+    && matchFacet(f.accessVector, state.accessVector);
+}
 function filteredDocs(){
   return DOCS
     .filter(rangePass)
     .filter(sevPass)
     .filter(summarySearchPass)
     .filter(actorPass)
-    .filter(toolPass);
+    .filter(toolPass)
+    .filter(facetPass);
 }
 
 function stageIndex(stage){
@@ -1293,16 +1579,24 @@ function sevPill(sev){
    ========================================================= */
 let loaderTimer = null;
 let loaderPct = 0;
+const LOADER_GUIDE_PARAGRAPHS = [
+  "This platform continuously converts real-world threat reporting into ATT&CK-mapped evidence so security teams can move from news to action quickly.",
+  "Use cases: triage emerging campaigns, prioritize high-impact incidents by severity and recency, and brief SOC/IR stakeholders with a shared operational view.",
+  "Analyst workflow: filter by environment-relevant facets, select a document, validate the attack path, then expand Hunt Pack for detections, remediation, and pivot points.",
+  "Operational value: maintain awareness of the changing cyber landscape, reduce blind spots across actors/tools/sectors, and accelerate detection engineering updates."
+];
 
-function showLoader(title="Loading", msg="Starting…"){
+function showLoader(title="Loading", msg="Startingâ€¦"){
   $("loaderTitle").textContent = title;
   $("loaderMsg").textContent = msg;
   setLoaderPct(0);
   $("loader").style.display = "flex";
+  startLoaderGuide();
 }
 function hideLoader(){
   $("loader").style.display = "none";
   stopLoaderTick();
+  stopLoaderGuide();
 }
 function setLoaderPct(p){
   loaderPct = Math.max(0, Math.min(100, Math.round(p)));
@@ -1310,6 +1604,14 @@ function setLoaderPct(p){
   $("loaderBar").style.width = `${loaderPct}%`;
 }
 function setLoaderMsg(msg){ $("loaderMsg").textContent = msg; }
+function startLoaderGuide(){
+  const el = $("loaderUsagePanel");
+  if(!el) return;
+  el.innerHTML = LOADER_GUIDE_PARAGRAPHS.map(x=>`<p>${escapeHtml(x)}</p>`).join("");
+}
+function stopLoaderGuide(){
+  // persistent usage panel intentionally remains static/readable while loader is visible
+}
 
 function startLoaderTick(target=35){
   stopLoaderTick();
@@ -1351,6 +1653,7 @@ async function pollHeartbeat(){
     const params = new URLSearchParams();
     if(loadedLatestSeq !== null && loadedLatestSeq !== undefined){
       params.set("since_seq", String(loadedLatestSeq));
+      if(loadedLatestTs) params.set("since_ts", loadedLatestTs);
     }else if(loadedLatestTs){
       params.set("since_ts", loadedLatestTs);
     }else{
@@ -1379,7 +1682,7 @@ function stopHeartbeat(){
    BOOTSTRAP
    ========================================================= */
 async function bootstrapFromServer({reason="Load"} = {}){
-  showLoader(reason, "Fetching documents…");
+  showLoader(reason, "Fetching documentsâ€¦");
   startLoaderTick(35);
 
   let data = null;
@@ -1387,7 +1690,7 @@ async function bootstrapFromServer({reason="Load"} = {}){
     const r = await fetch("/api/bootstrap", {cache:"no-store"});
     stopLoaderTick();
     setLoaderPct(45);
-    setLoaderMsg("Normalizing…");
+    setLoaderMsg("Normalizingâ€¦");
 
     if(!r.ok){
       const t = await r.text();
@@ -1395,7 +1698,7 @@ async function bootstrapFromServer({reason="Load"} = {}){
     }
     data = await r.json();
     setLoaderPct(70);
-    setLoaderMsg("Mapping techniques…");
+    setLoaderMsg("Mapping techniquesâ€¦");
   }catch(e){
     stopLoaderTick();
     setLoaderPct(100);
@@ -1409,7 +1712,14 @@ async function bootstrapFromServer({reason="Load"} = {}){
   uiNow = uiNowParsed || new Date();
 
   const nowStr = fmtDate(data?.meta?.ui_now);
-  $("envChip").textContent = nowStr !== "—" ? `now=${nowStr}` : "now";
+  const mode = String(data?.meta?.ui_now_mode || "latest");
+  const fresh = data?.meta?.data_freshness || {};
+  const ageSec = Number(fresh?.latest_age_seconds);
+  const ageTxt = Number.isFinite(ageSec) ? `${Math.floor(ageSec/3600)}h` : "n/a";
+  const staleTxt = fresh?.is_stale ? "stale" : "fresh";
+  $("envChip").textContent = nowStr !== "â€”"
+    ? `mode=${mode} â€¢ now=${nowStr} â€¢ ${staleTxt}(${ageTxt})`
+    : `mode=${mode}`;
 
   loadedLatestTs = data?.meta?.latest_ts || null;
   loadedLatestSeq = (data?.meta?.latest_seq !== null && data?.meta?.latest_seq !== undefined)
@@ -1445,7 +1755,7 @@ async function bootstrapFromServer({reason="Load"} = {}){
   setNewDocs(0);
 
   setLoaderPct(85);
-  setLoaderMsg("Rendering…");
+  setLoaderMsg("Renderingâ€¦");
 
   loadHash();
   render();
@@ -1511,6 +1821,23 @@ function buildPostActions(doc){
     out.push(s);
   }
   return out;
+}
+
+function firstActionHint(doc){
+  const detection = asArray(doc.Detection_Rules_And_Indicators)[0];
+  if(detection) return detection;
+  const post = asArray(doc.Post_Incident_Recommendations)[0];
+  if(post) return post;
+  return "Review attack path runbook";
+}
+function tacticDomId(tac){
+  return `tac-${String(tac||"other").toLowerCase().replace(/[^a-z0-9]+/g,"-")}`;
+}
+function facetToneBySeverity(sev){
+  const n = normalizeSeverity(sev);
+  if(n === "Critical") return "pink";
+  if(n === "High") return "amber";
+  return "violet";
 }
 
 function buildExfilWatch(doc){
@@ -1589,7 +1916,7 @@ function render(){
 
   $("sideMeta").textContent = `${docs.length} docs`;
   const uniqueTech = uniq(docs.flatMap(d=>d.Techniques||[])).length;
-  $("matrixMeta").textContent = `${docs.length} docs • ${uniqueTech} techniques`;
+  $("matrixMeta").textContent = `${docs.length} docs â€¢ ${uniqueTech} techniques`;
 
   const selDoc = state.selectedDocId ? DOCS.find(d=>d.id===state.selectedDocId) : null;
   if(selDoc && !docs.some(d=>d.id===selDoc.id)){
@@ -1606,6 +1933,7 @@ function render(){
   buildSideFilters(docs);
   renderSelectedDocBox(selDocNow);
   renderAggBox(docs);
+  renderOperationalPriorities(docs);
   renderTechniqueFocus(docs, techStats);
   renderPathStrip(selDocNow);
   renderMatrix(docs, techStats, selDocNow);
@@ -1620,21 +1948,32 @@ function render(){
 function buildSideFilters(docs){
   const actors = uniq(docs.flatMap(d=>d.Threat_Actors||[])).sort();
   const tools  = uniq(docs.flatMap(d=>d.Tools||[])).sort();
+  const dataRisk = uniq(docs.flatMap(d=>asArray((d.Victim||{}).Data_Types_At_Risk))).sort();
+  const countries = uniq(docs.flatMap(d=>asArray((d.Extracted_Entities||{}).Countries))).sort();
+  const breachTypes = uniq(docs.flatMap(d=>asArray((d.Extracted_Entities||{}).Breach_Types))).sort();
+  const sectors = uniq(docs.flatMap(d=>asArray((d.Extracted_Entities||{}).Sectors))).sort();
+  const software = uniq(docs.flatMap(d=>asArray((d.Extracted_Entities||{}).Software))).sort();
+  const accessVectors = uniq(docs.flatMap(d=>asArray((d.Victim||{}).Access_Vectors))).sort();
 
-  const actorSel = $("actorF");
-  const toolSel  = $("toolF");
+  const map = [
+    ["actor", "actorF", actors],
+    ["tool", "toolF", tools],
+    ["dataRisk", "dataRiskF", dataRisk],
+    ["country", "countryF", countries],
+    ["breachType", "breachTypeF", breachTypes],
+    ["sector", "sectorF", sectors],
+    ["software", "softwareF", software],
+    ["accessVector", "accessVectorF", accessVectors],
+  ];
 
-  const prevA = state.actor;
-  const prevT = state.tool;
-
-  actorSel.innerHTML = `<option value="ALL">All</option>` + actors.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
-  toolSel.innerHTML  = `<option value="ALL">All</option>` + tools.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("");
-
-  actorSel.value = actors.includes(prevA) ? prevA : "ALL";
-  toolSel.value  = tools.includes(prevT) ? prevT : "ALL";
-
-  state.actor = actorSel.value;
-  state.tool  = toolSel.value;
+  for(const [stateKey, elId, vals] of map){
+    const sel = $(elId);
+    if(!sel) continue;
+    const prev = state[stateKey] || "ALL";
+    sel.innerHTML = `<option value="ALL">All</option>` + vals.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+    sel.value = vals.includes(prev) ? prev : "ALL";
+    state[stateKey] = sel.value;
+  }
 }
 
 function renderAggBox(docs){
@@ -1652,11 +1991,11 @@ function renderAggBox(docs){
   for(const t of tools) toolCounts[t] = (toolCounts[t]||0)+1;
   for(const c of cves) cveCounts[c] = (cveCounts[c]||0)+1;
 
-  const topActors = pickTopN(actorCounts, 5).map(([k,v])=>`${k} (${v})`).join(", ") || "—";
-  const topTools  = pickTopN(toolCounts, 5).map(([k,v])=>`${k} (${v})`).join(", ") || "—";
-  const topCVEs   = pickTopN(cveCounts, 5).map(([k,v])=>`${k} (${v})`).join(", ") || "—";
+  const topActors = pickTopN(actorCounts, 5).map(([k,v])=>`${k} (${v})`).join(", ") || "â€”";
+  const topTools  = pickTopN(toolCounts, 5).map(([k,v])=>`${k} (${v})`).join(", ") || "â€”";
+  const topCVEs   = pickTopN(cveCounts, 5).map(([k,v])=>`${k} (${v})`).join(", ") || "â€”";
 
-  $("aggChip").textContent = `range=${state.allTime?"ALL":state.rangeDays+"d"} • sev=${state.sevMin}`;
+  $("aggChip").textContent = `range=${state.allTime?"ALL":state.rangeDays+"d"} â€¢ sev=${state.sevMin}`;
   $("aggKv").innerHTML = `
     <div class="k">Docs</div><div class="v">${total}</div>
     <div class="k">Techniques</div><div class="v">${techs.length}</div>
@@ -1664,6 +2003,46 @@ function renderAggBox(docs){
     <div class="k">Top Tools</div><div class="v">${escapeHtml(topTools)}</div>
     <div class="k">Top CVEs</div><div class="v">${escapeHtml(topCVEs)}</div>
   `;
+}
+
+
+function renderOperationalPriorities(docs){
+  const host = $("prioList");
+  const empty = $("prioEmpty");
+  host.innerHTML = "";
+
+  const ranked = docs
+    .slice()
+    .sort((a,b)=> (Number(b.priority_score||0)-Number(a.priority_score||0)) || (Number(b.relevance_score||0)-Number(a.relevance_score||0)))
+    .slice(0,5);
+
+  $("prioChip").textContent = `${ranked.length}`;
+  empty.style.display = ranked.length ? "none" : "block";
+
+  for(const d of ranked){
+    const item = document.createElement("div");
+    item.className = "docItem" + (state.selectedDocId===d.id ? " active" : "") + (isRecent24h(d) ? " hotGlow" : "");
+    const tags = Array.isArray(d.operational_tags) ? d.operational_tags : [];
+    const next = (d.Detection_Rules_And_Indicators||[])[0] || (d.Post_Incident_Recommendations||[])[0] || "Review attack path runbook";
+    item.innerHTML = `
+      <div class="row">
+        <div class="t">${sevPill(d.Severity)} ${escapeHtml(shortTitle(d.Title, 56))} ${isRecent24h(d) ? `<span class="pill recentBadge">NEW â‰¤24h</span>` : ``}</div>
+        <div class="ts">P${Number(d.priority_score||0)} â€¢ R${Number(d.relevance_score||0)}</div>
+      </div>
+      <div class="m">${escapeHtml(shortTitle(next, 130))}</div>
+      <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+        ${tags.slice(0,3).map(t=>`<span class="pill amber">${escapeHtml(t)}</span>`).join("") || `<span class="pill">General</span>`}
+      </div>
+    `;
+    item.addEventListener("click", ()=>{
+      state.selectedDocId = d.id;
+      state.huntOn = true;
+      $("hunt").checked = true;
+      syncHash();
+      render();
+    });
+    host.appendChild(item);
+  }
 }
 
 /* Selected doc box */
@@ -1688,7 +2067,7 @@ function renderSelectedDocBox(selDoc){
       <div class="k">Title</div><div class="v">${escapeHtml(selDoc.Title)}</div>
       <div class="k">Date</div><div class="v">${fmtDate(selDoc.Timestamp)} <span class="chip">age ${ageDaysFrom(selDoc.Timestamp)}d</span></div>
       <div class="k">Severity</div><div class="v">${sevPill(selDoc.Severity)}</div>
-      <div class="k">Next</div><div class="v">${escapeHtml(topChecks.join(" • ") || "Open Attack Path for runbook + checks.")}</div>
+      <div class="k">Next</div><div class="v">${escapeHtml(topChecks.join(" â€¢ ") || "Open Attack Path for runbook + checks.")}</div>
       <div class="k">Pivots</div>
       <div class="v" style="display:flex; gap:6px; flex-wrap:wrap;">
         ${(piv.actors||[]).slice(0,2).map(a=>`<button class="pivot" data-type="actor" data-pivot="actor:${escapeHtml(a)}">${escapeHtml(a)}</button>`).join("")}
@@ -1711,6 +2090,7 @@ function renderSelectedDocBox(selDoc){
   $("sdOpen").addEventListener("click", ()=> openDocModal(selDoc));
   $("sdTogglePath").addEventListener("click", ()=>{
     state.pathOn = !state.pathOn;
+    if(state.pathOn) state.packOn = false;
     syncHash();
     render();
   });
@@ -1727,7 +2107,7 @@ function renderTechniqueFocus(docs, techStats){
   const tid = state.selectedTechId;
   if(!tid){
     $("focusChip").textContent = "Technique: none";
-    $("focusCount").textContent = "—";
+    $("focusCount").textContent = "â€”";
     $("focusKv").innerHTML = `<div class="muted" style="font-size:12px;">Click a technique card to focus its evidence.</div>`;
     return;
   }
@@ -1737,22 +2117,22 @@ function renderTechniqueFocus(docs, techStats){
   $("focusChip").textContent = `Technique: ${tid}`;
   $("focusCount").textContent = `${s.count} docs`;
 
-  const topTools = pickTopN(s.toolCounts, 3).map(([k,v])=>`${k} (${v})`).join(", ") || "—";
-  const topActors = pickTopN(s.actorCounts, 3).map(([k,v])=>`${k} (${v})`).join(", ") || "—";
-  const topCVEs = pickTopN(s.cveCounts, 3).map(([k,v])=>`${k} (${v})`).join(", ") || "—";
+  const topTools = pickTopN(s.toolCounts, 3).map(([k,v])=>`${k} (${v})`).join(", ") || "â€”";
+  const topActors = pickTopN(s.actorCounts, 3).map(([k,v])=>`${k} (${v})`).join(", ") || "â€”";
+  const topCVEs = pickTopN(s.cveCounts, 3).map(([k,v])=>`${k} (${v})`).join(", ") || "â€”";
 
   const rel = (s.docs||[]).slice().sort((a,b)=>docRankScore(b)-docRankScore(a)).slice(0,4);
 
   $("focusKv").innerHTML = `
     <div class="k">Name</div><div class="v">${escapeHtml(meta.name)}</div>
-    <div class="k">Tactic</div><div class="v">${escapeHtml(meta.tactic || "—")}</div>
+    <div class="k">Tactic</div><div class="v">${escapeHtml(meta.tactic || "â€”")}</div>
     <div class="k">Weight</div><div class="v">${s.weight}</div>
     <div class="k">Top tools</div><div class="v">${escapeHtml(topTools)}</div>
     <div class="k">Top actors</div><div class="v">${escapeHtml(topActors)}</div>
     <div class="k">Top CVEs</div><div class="v">${escapeHtml(topCVEs)}</div>
     <div class="k">Evidence</div>
     <div class="v">
-      ${rel.map(d=>`<span class="pill violet" style="cursor:pointer;" data-open="${d.id}" title="${escapeHtml(d.Title)}">${escapeHtml(shortTitle(d.Title, 36))}</span>`).join(" ") || "—"}
+      ${rel.map(d=>`<span class="pill violet" style="cursor:pointer;" data-open="${d.id}" title="${escapeHtml(d.Title)}">${escapeHtml(shortTitle(d.Title, 36))}</span>`).join(" ") || "â€”"}
     </div>
   `;
   $("focusKv").querySelectorAll("[data-open]").forEach(el=>{
@@ -1777,10 +2157,10 @@ function renderDocList(docs, hostEl, emptyEl, countChipEl){
 
   for(const d of sorted){
     const item = document.createElement("div");
-    item.className = "docItem" + (state.selectedDocId===d.id ? " active" : "");
+    item.className = "docItem" + (state.selectedDocId===d.id ? " active" : "") + (isRecent24h(d) ? " hotGlow" : "");
     item.innerHTML = `
       <div class="row">
-        <div class="t">${sevPill(d.Severity)} ${escapeHtml(d.Title)}</div>
+        <div class="t">${sevPill(d.Severity)} ${escapeHtml(d.Title)} ${isRecent24h(d) ? `<span class="pill recentBadge">NEW â‰¤24h</span>` : ``}</div>
         <div class="ts">${fmtDate(d.Timestamp)}</div>
       </div>
       <div class="m">${escapeHtml(shortTitle(d.doc_summary || "", 140))}</div>
@@ -1836,17 +2216,18 @@ function renderPathStrip(selDoc){
   }
 
   const strip = document.createElement("div");
-  strip.className = "pathStrip hotPanel";
+  strip.className = `pathStrip hotPanel ${state.pathPinned ? "pinned" : ""}`.trim();
   strip.innerHTML = `
     <div class="row">
       <div class="title">
-        <b>Attack Path • ${escapeHtml(selDoc.Title)}</b>
+        <b>Attack Path â€¢ ${escapeHtml(selDoc.Title)}</b>
         <span>${escapeHtml(shortTitle(selDoc.doc_summary || "", 180))}</span>
       </div>
       <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;">
         <span class="chip">age ${ageDaysFrom(selDoc.Timestamp)}d</span>
         <span class="chip">tech ${(selDoc.Techniques||[]).length}</span>
         <button class="btn secondary sm" id="openDocFromPath">Open Doc</button>
+        <button class="btn secondary sm" id="togglePin">${state.pathPinned ? "Unpin" : "Pin"} Attack Path</button>
         <button class="btn sm" id="togglePack">${state.packOn ? "Hide" : "Show"} Hunt Pack</button>
       </div>
     </div>
@@ -1869,6 +2250,20 @@ function renderPathStrip(selDoc){
   `;
   host.appendChild(strip);
 
+  if(state.pathPinned){
+    const topbar = document.querySelector(".topbar");
+    const topOffset = (topbar ? topbar.offsetHeight : 70) + 8;
+    const rect = host.getBoundingClientRect();
+    strip.style.top = `${topOffset}px`;
+    strip.style.left = `${rect.left}px`;
+    strip.style.width = `${rect.width}px`;
+
+    const spacer = document.createElement("div");
+    spacer.className = "pathStripSpacer";
+    spacer.style.height = `${strip.offsetHeight}px`;
+    host.insertBefore(spacer, strip);
+  }
+
   const stagesHost = strip.querySelector("#stagesHost");
   for(const stage of STAGE_ORDER){
     const color = STAGE_COL[stage] || "#77ffb0";
@@ -1889,7 +2284,7 @@ function renderPathStrip(selDoc){
         ${
           has
             ? ts.map(tid=>`<span class="pill green" style="border-color:${color}66; background:${color}10; cursor:pointer;" data-tech="${tid}" title="${escapeHtml((TECH[tid]?.name)||"")}">${tid}</span>`).join("")
-            : `<span class="chip">—</span>`
+            : `<span class="chip">â€”</span>`
         }
       </div>
     `;
@@ -1906,6 +2301,11 @@ function renderPathStrip(selDoc){
   });
 
   strip.querySelector("#openDocFromPath").addEventListener("click", ()=> openDocModal(selDoc));
+  strip.querySelector("#togglePin").addEventListener("click", ()=>{
+    state.pathPinned = !state.pathPinned;
+    syncHash();
+    render();
+  });
   strip.querySelector("#togglePack").addEventListener("click", ()=>{
     state.packOn = !state.packOn;
     syncHash();
@@ -1953,21 +2353,21 @@ function renderHuntPackHTML(doc, pack){
             </h4>
             <div class="hpKvs">
               <div class="k">Severity</div><div class="v">${escapeHtml(normalizeSeverity(doc.Severity))}</div>
-              <div class="k">Actors</div><div class="v">${escapeHtml((doc.Threat_Actors||[]).join(", ") || "—")}</div>
-              <div class="k">Victim</div><div class="v">${escapeHtml(victim.Industry || "—")} • ${escapeHtml(victim.Geography || "—")}</div>
-              <div class="k">Assets</div><div class="v">${escapeHtml((victim.Targeted_Assets||[]).join(", ") || "—")}</div>
-              <div class="k">Impact</div><div class="v">${escapeHtml(victim.Impact_Severity || "—")}</div>
+              <div class="k">Actors</div><div class="v">${escapeHtml((doc.Threat_Actors||[]).join(", ") || "â€”")}</div>
+              <div class="k">Victim</div><div class="v">${escapeHtml(victim.Industry || "â€”")} â€¢ ${escapeHtml(victim.Geography || "â€”")}</div>
+              <div class="k">Assets</div><div class="v">${escapeHtml((victim.Targeted_Assets||[]).join(", ") || "â€”")}</div>
+              <div class="k">Impact</div><div class="v">${escapeHtml(victim.Impact_Severity || "â€”")}</div>
             </div>
             <div class="hr"></div>
             <div class="muted" style="font-family:var(--mono); font-size:11px;">doc_summary</div>
             <div style="margin-top:6px; font-size:12.5px; color:rgba(214,247,255,.86); line-height:1.45;">
-              ${escapeHtml(doc.doc_summary || "—")}
+              ${escapeHtml(doc.doc_summary || "â€”")}
             </div>
           </div>
 
           <div class="hpCard">
             <h4>Checks Now <span class="mini"><span class="chip">${pack.checks.length} items</span></span></h4>
-            ${checks.length ? `<ul class="list">${checks.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>` : `<div class="muted">—</div>`}
+            ${checks.length ? `<ul class="list">${checks.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>` : `<div class="muted">â€”</div>`}
           </div>
 
           <details class="hpCard" open>
@@ -1986,7 +2386,7 @@ function renderHuntPackHTML(doc, pack){
                       <b style="font-size:12.2px;">${escapeHtml(ph.Stage)}</b>
                       <div class="sumMeta">
                         <span class="chip">${techs.length} tech</span>
-                        <span class="chip">${escapeHtml(techs.slice(0,3).join(", ")+(techs.length>3?"…":"")) || "—"}</span>
+                        <span class="chip">${escapeHtml(techs.slice(0,3).join(", ")+(techs.length>3?"â€¦":"")) || "â€”"}</span>
                       </div>
                     </div>
                     <div style="font-size:12px; color:rgba(214,247,255,.82); line-height:1.4;">
@@ -2002,7 +2402,7 @@ function renderHuntPackHTML(doc, pack){
 
           <details class="hpCard">
             <summary>Post-incident Actions <span class="sumMeta"><span class="chip">${pack.post.length} items</span></span></summary>
-            ${post.length ? `<ul class="list">${post.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>` : `<div class="muted">—</div>`}
+            ${post.length ? `<ul class="list">${post.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>` : `<div class="muted">â€”</div>`}
           </details>
         </div>
 
@@ -2012,28 +2412,28 @@ function renderHuntPackHTML(doc, pack){
 
             <div class="muted" style="font-family:var(--mono); font-size:11px;">Actors</div>
             <div class="pivotBar">
-              ${(piv.actors||[]).length ? piv.actors.map(a=>`<button class="pivot" data-type="actor" data-pivot="actor:${escapeHtml(a)}">${escapeHtml(a)}</button>`).join("") : `<span class="chip">—</span>`}
+              ${(piv.actors||[]).length ? piv.actors.map(a=>`<button class="pivot" data-type="actor" data-pivot="actor:${escapeHtml(a)}">${escapeHtml(a)}</button>`).join("") : `<span class="chip">â€”</span>`}
             </div>
 
             <div class="muted" style="font-family:var(--mono); font-size:11px; margin-top:10px;">Tools</div>
             <div class="pivotBar">
-              ${(piv.tools||[]).length ? piv.tools.map(t=>`<button class="pivot" data-type="tool" data-pivot="tool:${escapeHtml(t)}">${escapeHtml(t)}</button>`).join("") : `<span class="chip">—</span>`}
+              ${(piv.tools||[]).length ? piv.tools.map(t=>`<button class="pivot" data-type="tool" data-pivot="tool:${escapeHtml(t)}">${escapeHtml(t)}</button>`).join("") : `<span class="chip">â€”</span>`}
             </div>
 
             <div class="muted" style="font-family:var(--mono); font-size:11px; margin-top:10px;">CVEs</div>
             <div class="pivotBar">
-              ${(piv.cves||[]).length ? piv.cves.map(c=>`<button class="pivot" data-type="cve" data-pivot="search:${escapeHtml(c)}">${escapeHtml(c)}</button>`).join("") : `<span class="chip">—</span>`}
+              ${(piv.cves||[]).length ? piv.cves.map(c=>`<button class="pivot" data-type="cve" data-pivot="search:${escapeHtml(c)}">${escapeHtml(c)}</button>`).join("") : `<span class="chip">â€”</span>`}
             </div>
           </div>
 
           <details class="hpCard">
             <summary>Diamond Model <span class="sumMeta"><span class="chip">triage</span></span></summary>
             <div class="hpKvs">
-              <div class="k">Adversary</div><div class="v">${escapeHtml(adv.Description || "—")}</div>
-              <div class="k">Motivation</div><div class="v">${escapeHtml(adv.Motivation || "—")}</div>
-              <div class="k">Capability</div><div class="v">${escapeHtml(cap.Description || "—")}</div>
-              <div class="k">Infrastructure</div><div class="v">${escapeHtml(infra.Description || "—")}</div>
-              <div class="k">Victim</div><div class="v">${escapeHtml((doc.Victim?.Description) || "—")}</div>
+              <div class="k">Adversary</div><div class="v">${escapeHtml(adv.Description || "â€”")}</div>
+              <div class="k">Motivation</div><div class="v">${escapeHtml(adv.Motivation || "â€”")}</div>
+              <div class="k">Capability</div><div class="v">${escapeHtml(cap.Description || "â€”")}</div>
+              <div class="k">Infrastructure</div><div class="v">${escapeHtml(infra.Description || "â€”")}</div>
+              <div class="k">Victim</div><div class="v">${escapeHtml((doc.Victim?.Description) || "â€”")}</div>
             </div>
           </details>
 
@@ -2064,19 +2464,19 @@ function renderHuntPackHTML(doc, pack){
           <details class="hpCard">
             <summary>Exfil / Impact Watch <span class="sumMeta"><span class="chip">${ex.indicators.length} signals</span></span></summary>
             <div class="muted" style="font-family:var(--mono); font-size:11px;">Data at risk</div>
-            ${ex.dataAtRisk.length ? `<div style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">${ex.dataAtRisk.slice(0,10).map(x=>`<span class="pill amber">${escapeHtml(x)}</span>`).join("")}</div>` : `<div class="muted">—</div>`}
+            ${ex.dataAtRisk.length ? `<div style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">${ex.dataAtRisk.slice(0,10).map(x=>`<span class="pill amber">${escapeHtml(x)}</span>`).join("")}</div>` : `<div class="muted">â€”</div>`}
             <div class="hr"></div>
             <div class="muted" style="font-family:var(--mono); font-size:11px;">Watch for</div>
-            ${ex.indicators.length ? `<ul class="list">${ex.indicators.slice(0,10).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>` : `<div class="muted">—</div>`}
+            ${ex.indicators.length ? `<ul class="list">${ex.indicators.slice(0,10).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>` : `<div class="muted">â€”</div>`}
           </details>
 
           <details class="hpCard">
-            <summary>Evidence Integrity <span class="sumMeta"><span class="chip">${escapeHtml(doc.enrichment?.version || "—")}</span></span></summary>
+            <summary>Evidence Integrity <span class="sumMeta"><span class="chip">${escapeHtml(doc.enrichment?.version || "â€”")}</span></span></summary>
             <div class="hpKvs">
-              <div class="k">processed_at</div><div class="v">${escapeHtml(doc.enrichment?.processed_at || "—")}</div>
-              <div class="k">version</div><div class="v">${escapeHtml(doc.enrichment?.version || "—")}</div>
-              <div class="k">sequence</div><div class="v">${escapeHtml(String(doc.sequence ?? "—"))}</div>
-              <div class="k">source</div><div class="v">${doc.source ? `<a style="color:rgba(0,245,255,.95); text-decoration:none; border-bottom:1px solid rgba(0,245,255,.25);" href="${escapeHtml(doc.source)}" target="_blank" rel="noopener">open source</a>` : "—"}</div>
+              <div class="k">processed_at</div><div class="v">${escapeHtml(doc.enrichment?.processed_at || "â€”")}</div>
+              <div class="k">version</div><div class="v">${escapeHtml(doc.enrichment?.version || "â€”")}</div>
+              <div class="k">sequence</div><div class="v">${escapeHtml(String(doc.sequence ?? "â€”"))}</div>
+              <div class="k">source</div><div class="v">${doc.source ? `<a style="color:rgba(0,245,255,.95); text-decoration:none; border-bottom:1px solid rgba(0,245,255,.25);" href="${escapeHtml(doc.source)}" target="_blank" rel="noopener">open source</a>` : "â€”"}</div>
             </div>
           </details>
         </div>
@@ -2117,6 +2517,7 @@ function renderMatrix(docs, techStats, selDoc){
 
     const col = document.createElement("div");
     col.className = "tacticCol";
+    col.id = tacticDomId(tac);
 
     // glow tactic column if it contains techniques for selected doc/path
     if(selDoc){
@@ -2167,12 +2568,13 @@ function renderMatrix(docs, techStats, selDoc){
       card.innerHTML = `
         <div class="row1">
           <span class="tid">${t.tid}</span>
-          <span class="score">w:${t.weight} • n:${t.count}</span>
+          <span class="score">w:${t.weight} â€¢ n:${t.count}</span>
         </div>
         <div class="name" title="${escapeHtml(t.name || t.tid)}">${escapeHtml(t.name || t.tid)}</div>
         <div style="margin-top:7px; display:flex; gap:6px; flex-wrap:wrap;">
-          ${topDocs.slice(0,3).map(d=>`<span class="pill violet" style="cursor:pointer;" data-doc="${d.id}" title="${escapeHtml(d.Title)}">${escapeHtml(shortTitle(d.Title, 18))}</span>`).join("")}
+          ${topDocs.slice(0,2).map(d=>`<span class="pill ${facetToneBySeverity(d.Severity)}" style="cursor:pointer; max-width:100%;" data-doc="${d.id}" title="${escapeHtml(d.Title)}\n${escapeHtml(firstActionHint(d))}">[${escapeHtml(normalizeSeverity(d.Severity))}][P${Number(d.priority_score||0)}][${ageBadgeFrom(d.Timestamp)}] ${escapeHtml(shortTitle(d.Title, 18))}</span>`).join("")}
         </div>
+        <div style="margin-top:6px; color:rgba(210,222,255,.82); font-size:11px; line-height:1.25;">${topDocs.slice(0,1).map(d=>escapeHtml(shortTitle(firstActionHint(d), 84))).join("") || ""}</div>
       `;
 
       card.addEventListener("click", (e)=>{
@@ -2195,6 +2597,21 @@ function renderMatrix(docs, techStats, selDoc){
     }
 
     host.appendChild(col);
+  }
+
+  const nav = $("matrixNavTrack");
+  if(nav){
+    nav.innerHTML = TACTIC_ORDER.map(tac=>{
+      const cnt = (byTactic[tac]||[]).length;
+      const cls = cnt ? "matrixNavDot hot" : "matrixNavDot";
+      return `<button class="${cls}" data-tac="${escapeHtml(tac)}">${escapeHtml(shortTitle(tac, 16))} (${cnt})</button>`;
+    }).join("");
+    nav.querySelectorAll("[data-tac]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const el = $(tacticDomId(btn.getAttribute("data-tac")));
+        if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+      });
+    });
   }
 
   $("emptyMatrix").style.display = rendered ? "none" : "block";
@@ -2224,12 +2641,12 @@ function openDocModal(doc){
           <span class="pill green">Tech: ${(doc.Techniques||[]).length}</span>
         </div>
         <b class="muted">doc_summary</b><br/>
-        ${escapeHtml(doc.doc_summary || "—")}
+        ${escapeHtml(doc.doc_summary || "â€”")}
       </div>
       <div class="blockquote">
         <b class="muted">Techniques</b><br/>
         <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
-          ${techChips || "—"}
+          ${techChips || "â€”"}
         </div>
         <div class="hr"></div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -2261,6 +2678,7 @@ function openDocModal(doc){
   $("togglePathFromModal").addEventListener("click", ()=>{
     state.selectedDocId = doc.id;
     state.pathOn = !state.pathOn;
+    if(state.pathOn) state.packOn = false;
     syncHash();
     render();
     $("docModal").close();
@@ -2373,6 +2791,17 @@ $("switcherModal").addEventListener("keydown", (e)=>{
   if(e.key === "Enter"){ e.preventDefault(); items[switcherIdx].click(); }
 });
 
+/* Share */
+$("shareBtn").addEventListener("click", async ()=>{
+  try{
+    const shareUrl = `${location.origin}${location.pathname}${location.hash || ""}`;
+    await navigator.clipboard.writeText(shareUrl);
+    toast("Share link copied");
+  }catch{
+    toast("Unable to copy link");
+  }
+});
+
 /* Help/About */
 $("helpBtn").addEventListener("click", ()=> $("helpModal").showModal());
 $("aboutBtn").addEventListener("click", ()=> $("aboutModal").showModal());
@@ -2384,6 +2813,12 @@ $("sev").addEventListener("change", ()=>{ state.sevMin = $("sev").value; syncHas
 $("q").addEventListener("input", ()=>{ state.q = $("q").value; syncHash(); render(); });
 $("actorF").addEventListener("change", ()=>{ state.actor = $("actorF").value; syncHash(); render(); });
 $("toolF").addEventListener("change", ()=>{ state.tool = $("toolF").value; syncHash(); render(); });
+$("dataRiskF").addEventListener("change", ()=>{ state.dataRisk = $("dataRiskF").value; syncHash(); render(); });
+$("countryF").addEventListener("change", ()=>{ state.country = $("countryF").value; syncHash(); render(); });
+$("breachTypeF").addEventListener("change", ()=>{ state.breachType = $("breachTypeF").value; syncHash(); render(); });
+$("sectorF").addEventListener("change", ()=>{ state.sector = $("sectorF").value; syncHash(); render(); });
+$("softwareF").addEventListener("change", ()=>{ state.software = $("softwareF").value; syncHash(); render(); });
+$("accessVectorF").addEventListener("change", ()=>{ state.accessVector = $("accessVectorF").value; syncHash(); render(); });
 
 $("hunt").addEventListener("change", ()=>{
   state.huntOn = $("hunt").checked;
@@ -2394,6 +2829,7 @@ $("hunt").addEventListener("change", ()=>{
 $("pathBtn").addEventListener("click", ()=>{
   if($("pathBtn").disabled) return;
   state.pathOn = !state.pathOn;
+  if(state.pathOn) state.packOn = false;
   syncHash(); render();
 });
 
@@ -2415,21 +2851,23 @@ $("autoCheck").addEventListener("change", ()=>{
 $("clearAll").addEventListener("click", ()=>{
   location.hash = "";
   Object.assign(state, {
-    rangeDays:90, allTime:false, sevMin:"ALL", q:"",
+    rangeDays:7, allTime:false, sevMin:"ALL", q:"",
     actor:"ALL", tool:"ALL",
+    dataRisk:"ALL", country:"ALL", breachType:"ALL", sector:"ALL", software:"ALL", accessVector:"ALL",
     selectedDocId:null, selectedTechId:null,
     huntOn:true, pathOn:false,
-    packOn:true,
+    pathPinned:true,
+    packOn:false,
     sideTab:"focus",
     autoCheck: $("autoCheck").checked,
     newCount: 0,
   });
-  $("range").value = "90";
-  $("rangeV").textContent = "90d";
+  $("range").value = "7";
+  $("rangeV").textContent = "7d";
   $("sev").value = "ALL";
   $("q").value = "";
   $("hunt").checked = true;
-  setPresetActive("90");
+  setPresetActive("7");
   setNewDocs(0);
   syncHash();
   render();
@@ -2494,8 +2932,15 @@ function syncHash(){
   p.set("q", state.q || "");
   p.set("actor", state.actor);
   p.set("tool", state.tool);
+  p.set("dr", state.dataRisk);
+  p.set("cty", state.country);
+  p.set("bt", state.breachType);
+  p.set("sec", state.sector);
+  p.set("sw", state.software);
+  p.set("av", state.accessVector);
   p.set("hunt", state.huntOn ? "1" : "0");
   p.set("path", state.pathOn ? "1" : "0");
+  p.set("pathpin", state.pathPinned ? "1" : "0");
   p.set("pack", state.packOn ? "1" : "0");
   if(state.selectedDocId) p.set("doc", state.selectedDocId);
   if(state.selectedTechId) p.set("tech", state.selectedTechId);
@@ -2509,13 +2954,20 @@ function loadHash(){
   state.q = p.get("q") || "";
   state.actor = p.get("actor") || "ALL";
   state.tool = p.get("tool") || "ALL";
+  state.dataRisk = p.get("dr") || "ALL";
+  state.country = p.get("cty") || "ALL";
+  state.breachType = p.get("bt") || "ALL";
+  state.sector = p.get("sec") || "ALL";
+  state.software = p.get("sw") || "ALL";
+  state.accessVector = p.get("av") || "ALL";
   state.huntOn = (p.get("hunt") || "1") === "1";
   state.pathOn = (p.get("path") || "0") === "1";
-  state.packOn = (p.get("pack") || "1") === "1";
+  state.pathPinned = (p.get("pathpin") || "1") === "1";
+  state.packOn = (p.get("pack") || "0") === "1";
   state.selectedDocId = p.get("doc");
   state.selectedTechId = p.get("tech");
   state.allTime = (p.get("all") || "0") === "1";
-  const r = Number(p.get("r") || "90");
+  const r = Number(p.get("r") || "7");
   if(!state.allTime && !Number.isNaN(r)) state.rangeDays = r;
 
   $("sev").value = state.sevMin;
@@ -2532,6 +2984,47 @@ function loadHash(){
   }
 }
 window.addEventListener("hashchange", ()=>{ loadHash(); render(); });
+window.addEventListener("resize", ()=>{ if(state.pathOn) render(); });
+
+/* Minimap */
+function scrollMiniTarget(targetId){
+  const el = $(targetId);
+  if(!el) return;
+  const sideTargets = new Set(["aggBox","prioBox","focusBox","docsBox"]);
+  if(sideTargets.has(targetId)){
+    $("sideBody").scrollTo({ top: Math.max(0, el.offsetTop - 12), behavior: "smooth" });
+    return;
+  }
+  if(targetId === "pathStripHost"){
+    $("matrixPanel").querySelector(".matrixBody").scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  el.scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+function setMiniActiveByScroll(){
+  const rows = Array.from(document.querySelectorAll("#miniTrack .miniRow"));
+  rows.forEach(r=>r.classList.remove("active"));
+  const sideBody = $("sideBody");
+  const scrollTop = sideBody.scrollTop;
+  const ordered = ["aggBox","prioBox","focusBox","docsBox"];
+  let activeId = "matrixPanel";
+  for(const id of ordered){
+    const el = $(id);
+    if(!el || el.offsetParent === null) continue;
+    if(scrollTop >= (el.offsetTop - 30)) activeId = id;
+  }
+  const row = rows.find(r=>r.getAttribute("data-target")===activeId) || rows[0];
+  if(row) row.classList.add("active");
+}
+
+$("miniTrack").addEventListener("click", (e)=>{
+  const btn = e.target.closest(".miniRow");
+  if(!btn) return;
+  scrollMiniTarget(btn.getAttribute("data-target"));
+});
+$("sideBody").addEventListener("scroll", setMiniActiveByScroll, {passive:true});
+setMiniActiveByScroll();
 
 /* Init */
 (async function init(){
