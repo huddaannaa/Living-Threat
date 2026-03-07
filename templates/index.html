@@ -60,6 +60,23 @@
       overflow:hidden;
     }
 
+    /* unified scrollbar styling */
+    *{
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0,245,255,.45) rgba(255,255,255,.08);
+    }
+    *::-webkit-scrollbar{ width:10px; height:10px; }
+    *::-webkit-scrollbar-track{
+      background: rgba(255,255,255,.06);
+      border-radius: 999px;
+    }
+    *::-webkit-scrollbar-thumb{
+      background: linear-gradient(180deg, rgba(0,245,255,.60), rgba(181,139,255,.52));
+      border-radius:999px;
+      border:2px solid rgba(0,0,0,.22);
+    }
+    *::-webkit-scrollbar-thumb:hover{ background: linear-gradient(180deg, rgba(0,245,255,.72), rgba(181,139,255,.64)); }
+
     .muted{ color:rgba(214,247,255,.62); }
     .hr{ height:1px; background: rgba(255,255,255,.10); margin:10px 0; }
     .blockquote{
@@ -94,7 +111,9 @@
       display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
     }
 
-    .brand{ display:flex; flex-direction:column; gap:4px; min-width:260px; }
+    .topNavActions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-left:auto; justify-content:flex-end; }
+    .topNavActions .btn{ white-space:nowrap; }
+    .brand{ display:flex; flex-direction:column; gap:4px; min-width:260px; flex:1; }
     .brand .title{ display:flex; align-items:center; gap:10px; font-weight:900; letter-spacing:.25px; font-size:14px; }
     .brand .title .dot{
       width:9px; height:9px; border-radius:50%;
@@ -249,13 +268,73 @@
     .main{
       padding:12px clamp(14px, 2vw, 28px) 14px;
       display:grid;
-      grid-template-columns: 1fr 390px;
+      grid-template-columns: 360px 1fr 360px;
       gap:12px;
       min-height:0;
     }
     @media (max-width: 1060px){
       body{ overflow:auto; }
       .main{ grid-template-columns: 1fr; }
+      /* Mobile-first content flow: Navigator -> Operations -> Evidence */
+      #matrixPanel{ order:1; }
+      #sidePanelRight{ order:2; }
+      #sidePanel{ order:3; }
+    }
+
+    @media (max-width: 860px){
+      .topbarInner{ padding:10px 12px; }
+      .brand{ min-width:0; width:100%; }
+      .brand .sub{ font-size:11px; }
+      .topNavActions{ width:100%; }
+      .bar{
+        min-width:0;
+        width:100%;
+        justify-content:flex-start;
+      }
+      .ctl, .rangeCtl, .toggle{ width:100%; border-radius:12px; }
+      .rangeCtl{ flex-wrap:wrap; }
+      input[type="range"]{ width:100%; }
+      .presets{ width:100%; }
+      .btn{ width:100%; text-align:center; }
+      .filters{ grid-template-columns: 1fr; }
+      .kv{ grid-template-columns: 1fr; }
+      .matrixBody, .sideBody, .rightSideBody{ padding:10px; }
+      .tacticGrid{ grid-template-columns: 1fr; gap:8px; }
+      .techCard{ padding:8px; }
+      .row1{ gap:6px; }
+      .score{ font-size:10px; }
+      .rankBadge{ font-size:9px; }
+      .cardDocBtn{ width:24px; height:24px; }
+      .hunterQuick{ grid-template-columns: 1fr; }
+      .pathStrip.pinned{
+        position: static;
+        max-height: none;
+        overflow: visible;
+      }
+      .pathStrip.pinned .huntPack{ max-height:none; overflow:visible; }
+      .pathStripSpacer{ display:none; }
+      .priorityLegendMap.floating{
+        position: static;
+        width:100%;
+        margin-top:8px;
+      }
+      .modal, .drawer{ width:100%; border-radius:14px; }
+    }
+
+    @media (max-width: 560px){
+      .topbarInner{ gap:8px; }
+      .brand .title{ font-size:13px; }
+      .chip{ font-size:10px; }
+      .panelHd{ padding:8px 10px; }
+      .tacticHd{ padding:8px 8px 6px; }
+      .tacticHd b{ font-size:11.5px; }
+      .tacticHd .count{ font-size:10px; }
+      .legendRow{ font-size:10px; }
+      .stage{ min-width: 100%; }
+      .hpCard{ padding:8px; }
+      .docItem .t{ font-size:12px; }
+      .docItem .m{ font-size:11px; }
+      .priorityLegendRow{ font-size:9.5px; }
     }
 
     .panel{
@@ -290,9 +369,13 @@
       text-align:right;
     }
 
-    .matrixPanel{ background: var(--panelA); border-color: rgba(0,245,255,.18); }
+    .matrixPanel{ background: var(--panelA); border-color: rgba(0,245,255,.18); position:relative; }
     .matrixPanel .panelHd{
       background: linear-gradient(180deg, rgba(0,245,255,.06), rgba(0,0,0,.0));
+      position: sticky;
+      top: 0;
+      z-index: 8;
+      backdrop-filter: blur(6px);
     }
 
     .matrixBody{
@@ -322,6 +405,41 @@
       margin-bottom:6px;
     }
     .matrixNavTrack{ display:flex; gap:6px; flex-wrap:wrap; }
+    .priorityLegendMap{
+      border:1px solid rgba(0,245,255,.20);
+      border-radius:14px;
+      background: rgba(2,8,14,.86);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      padding:8px;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      width:170px;
+    }
+    .priorityLegendMap.floating{
+      position:absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 24;
+    }
+    .priorityLegendRow{
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.12);
+      min-height:16px;
+      padding:3px 6px;
+      font-size:10px;
+      color:rgba(214,247,255,.82);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font-family:var(--mono);
+    }
+    .priorityLegendRow.r1{ background: rgba(255,132,132,.22); border-color: rgba(255,132,132,.58); color:#ffd8d8; }
+    .priorityLegendRow.r2{ background: rgba(255,220,120,.22); border-color: rgba(255,220,120,.62); color:#fff1c4; }
+    .priorityLegendRow.r3{ background: rgba(140,190,255,.22); border-color: rgba(140,190,255,.58); color:#d9ecff; }
+    .priorityLegendRow.hit{ background: rgba(255,225,112,.30); border-color: rgba(255,225,112,.76); color:#fff6cf; }
+    .priorityLegendRow.fade{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.18); color:rgba(214,247,255,.72); }
     .matrixNavDot{
       border:1px solid rgba(0,245,255,.16);
       border-radius:999px;
@@ -346,9 +464,107 @@
       overflow:auto;
       padding:12px;
     }
+    .rightSidePanel{ background: rgba(28,20,8,.56); border-color: rgba(255,204,102,.30); }
+    .rightSidePanel .panelHd{
+      border-bottom-color: rgba(255,204,102,.22);
+      background: linear-gradient(180deg, rgba(255,204,102,.10), rgba(0,0,0,.0));
+    }
+    .rightSideBody{
+      height: calc(100vh - 84px - 14px - 14px);
+      min-height: 420px;
+      overflow:auto;
+      padding:12px;
+    }
+    @media (max-width:1060px){
+      .rightSideBody{ height:auto; min-height:unset; }
+    }
     @media (max-width:1060px){
       .sideBody{ height:auto; min-height:unset; }
     }
+
+    .panelTools{ display:flex; align-items:center; gap:8px; }
+    .activeFiltersBar{
+      border-bottom:1px solid rgba(0,245,255,.12);
+      padding:8px 12px;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      background: rgba(2,12,18,.45);
+    }
+    .activeFilterChip{
+      border-radius:999px;
+      border:1px solid rgba(0,245,255,.22);
+      background: rgba(0,245,255,.08);
+      color:rgba(214,247,255,.9);
+      font-size:11px;
+      padding:4px 8px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .activeFilterChip .x{ cursor:pointer; opacity:.8; }
+    .aggSearch{ margin-bottom:8px; }
+    .aggTopFilters{ margin-bottom:8px; }
+    .aggPresetRow{ margin-bottom:8px; }
+    .navActions{ display:flex; gap:8px; align-items:center; flex-wrap:nowrap; }
+    #pathBtn{ min-width:120px; }
+    #hidePathBtn{ min-width:110px; }
+    #newBadge{ min-width:80px; justify-content:center; }
+
+    .onboardingOverlay{
+      position:fixed;
+      inset:0;
+      z-index:140;
+      display:none;
+      background: rgba(2,7,14,.40);
+      pointer-events:none;
+    }
+    .onboardingOverlay.show{ display:block; }
+    .tourSpotlight{
+      position:fixed;
+      z-index:141;
+      border-radius:14px;
+      border:2px solid rgba(0,245,255,.85);
+      box-shadow: 0 0 0 500vmax rgba(2,7,14,.62), 0 0 28px rgba(0,245,255,.25);
+      pointer-events:none;
+      display:none;
+    }
+    .tourSpotlight.show{ display:block; }
+    .tourCard{
+      position:fixed;
+      z-index:142;
+      width:min(440px, calc(100vw - 24px));
+      border-radius:16px;
+      border:1px solid rgba(0,245,255,.24);
+      background: rgba(6,12,18,.96);
+      box-shadow: var(--shadow);
+      padding:12px;
+      display:none;
+    }
+    .tourCard.show{ display:block; }
+    .tourCard h4{ margin:0 0 8px; font-size:14px; }
+    .tourCard p{ margin:0; font-size:12px; line-height:1.45; color:rgba(214,247,255,.86); }
+    .tourActions{ margin-top:10px; display:flex; gap:8px; justify-content:flex-end; }
+    .tourStep{ font-family:var(--mono); font-size:10px; color:rgba(214,247,255,.7); margin-bottom:6px; }
+    .tourPref{ margin-top:8px; font-size:11px; color:rgba(214,247,255,.78); display:flex; align-items:center; gap:6px; }
+    .tourArrow{
+      position:fixed;
+      z-index:142;
+      font-size:20px;
+      color:#9ff9ff;
+      text-shadow: 0 0 10px rgba(0,245,255,.45);
+      display:none;
+      pointer-events:none;
+    }
+    .tourArrow.show{ display:block; }
+    .tourDismiss{
+      position:fixed;
+      top:12px;
+      right:12px;
+      z-index:142;
+      display:none;
+    }
+    .tourDismiss.show{ display:inline-flex; }
 
     .box{
       border-radius: 14px;
@@ -443,6 +659,9 @@
       min-width: 0;
       transition: box-shadow .2s ease, border-color .2s ease, transform .08s ease;
     }
+    .tacticCol.rank1bg{ background: linear-gradient(180deg, rgba(255,132,132,.18), rgba(0,0,0,.14)); }
+    .tacticCol.rank2bg{ background: linear-gradient(180deg, rgba(255,222,120,.16), rgba(0,0,0,.14)); }
+    .tacticCol.rank3bg{ background: linear-gradient(180deg, rgba(134,186,255,.14), rgba(0,0,0,.14)); }
     .tacticCol.hotPanel{
       border-color: var(--hlRed);
       box-shadow:
@@ -487,7 +706,7 @@
     .techCard:hover{ transform: translateY(-1px); border-color: rgba(0,245,255,.32); }
     .techCard.active{ outline: 2px solid rgba(181,139,255,.22); border-color: rgba(181,139,255,.30); }
 
-    .techCard.docHit, .techCard.pathHit{
+    .techCard.pathHit{
       border-color: var(--hlRed);
       box-shadow: 0 0 0 1px var(--hlRed2), 0 0 30px var(--hlGlow);
       background: linear-gradient(180deg, rgba(255, 132, 132, .10), rgba(7,26,34,.40));
@@ -496,7 +715,70 @@
       border-left: 4px solid var(--pathColor, rgba(255, 132, 132, .90));
       padding-left: 7px;
     }
-    .techCard.dim{ filter: saturate(.65) opacity(.60); }
+    .techCard.dim{ filter: saturate(.28) opacity(.22); }
+    .techCard.recommended{
+      border-color: rgba(0,245,255,.14);
+      box-shadow: none;
+    }
+    .techCard.recommended.rank1{
+      background: linear-gradient(180deg, rgba(255,132,132,.46), rgba(255,132,132,.26), rgba(7,26,34,.40));
+    }
+    .techCard.recommended.rank2{
+      background: linear-gradient(180deg, rgba(255,222,120,.44), rgba(255,222,120,.24), rgba(7,26,34,.40));
+    }
+    .techCard.recommended.rank3{
+      background: linear-gradient(180deg, rgba(134,186,255,.40), rgba(134,186,255,.22), rgba(7,26,34,.40));
+    }
+    .techCard.docHit{
+      border-color: rgba(255,225,112,.80);
+      box-shadow: 0 0 0 1px rgba(255,225,112,.46), 0 0 30px rgba(255,225,112,.34);
+      background: linear-gradient(180deg, rgba(255,225,112,.34), rgba(255,225,112,.16), rgba(7,26,34,.40));
+    }
+    .rankBadge{
+      font-family:var(--mono);
+      font-size:10px;
+      padding:2px 6px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
+      white-space:nowrap;
+    }
+    .rankBadge.r1{ background: rgba(255,132,132,.28); border-color: rgba(255,132,132,.70); color:#ffd8d8; }
+    .rankBadge.r2{ background: rgba(255,220,120,.28); border-color: rgba(255,220,120,.72); color:#fff1c4; }
+    .rankBadge.r3{ background: rgba(140,190,255,.28); border-color: rgba(140,190,255,.70); color:#d9ecff; }
+
+    .hunterQuick{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap:8px;
+    }
+    .hunterBox{
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:12px;
+      background: rgba(0,0,0,.14);
+      padding:8px;
+    }
+    .hunterBox h4{
+      margin:0 0 6px;
+      font-size:11.5px;
+      font-weight:900;
+      color:rgba(214,247,255,.92);
+    }
+    .hunterList{ margin:0; padding-left:16px; display:grid; gap:3px; }
+    .hunterList li{ font-size:11px; line-height:1.3; color:rgba(214,247,255,.86); }
+    .stageCtx{
+      margin-top:8px;
+      border-top:1px dashed rgba(255,255,255,.12);
+      padding-top:7px;
+      display:grid;
+      gap:4px;
+    }
+    .stageCtx .muted{ font-size:10.5px; }
+    .stageCtx ul{ margin:0; padding-left:16px; display:grid; gap:2px; }
+    .stageCtx li{ font-size:10.8px; line-height:1.28; color:rgba(214,247,255,.84); }
+    @media (max-width: 980px){
+      .hunterQuick{ grid-template-columns: 1fr; }
+    }
 
     .row1{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; min-width:0; }
     .tid{
@@ -511,6 +793,46 @@
     }
     .score{ font-family:var(--mono); font-size:11px; color:rgba(214,247,255,.70); white-space:nowrap; }
     .name{ font-size:12.6px; font-weight:900; line-height:1.2; overflow:hidden; text-overflow:ellipsis; }
+    .cardDocBtn{
+      margin-left:auto;
+      width:22px;
+      height:22px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.20);
+      color:rgba(214,247,255,.90);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      font-size:12px;
+      line-height:1;
+    }
+    .cardDocBtn:hover{ border-color: rgba(0,245,255,.36); }
+    .cardDocMenu{
+      margin-top:7px;
+      border:1px solid rgba(0,245,255,.18);
+      border-radius:12px;
+      background: rgba(2,12,18,.85);
+      padding:6px;
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+      max-height:180px;
+      overflow:auto;
+    }
+    .cardDocItem{
+      width:100%;
+      text-align:left;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:8px;
+      background: rgba(255,255,255,.05);
+      color:rgba(214,247,255,.88);
+      font-size:11px;
+      line-height:1.25;
+      padding:6px 7px;
+      cursor:pointer;
+    }
+    .cardDocItem:hover{ border-color: rgba(0,245,255,.34); }
 
     .pill{
       font-family:var(--mono);
@@ -531,7 +853,7 @@
     /* Attack path */
     .pathStrip{
       border:1px solid rgba(119,255,176,.18);
-      background: rgba(119,255,176,.06);
+      background: rgba(119,255,176,.20);
       border-radius: 14px;
       padding:10px;
       margin-bottom:10px;
@@ -554,7 +876,7 @@
     .pathStrip.hotPanel{
       border-color: var(--hlRed);
       box-shadow: 0 0 0 1px var(--hlRed2), 0 0 34px var(--hlGlow);
-      background: linear-gradient(180deg, rgba(255, 132, 132, .07), rgba(119,255,176,.06));
+      background: linear-gradient(180deg, rgba(255, 132, 132, .20), rgba(119,255,176,.20));
     }
     .pathStrip .row{
       display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
@@ -612,7 +934,7 @@
     .huntPack{
       margin-top:10px;
       border:1px solid rgba(181,139,255,.20);
-      background: rgba(181,139,255,.06);
+      background: rgba(181,139,255,.20);
       border-radius: 14px;
       padding:10px;
     }
@@ -742,6 +1064,12 @@
       box-shadow: var(--shadow);
       backdrop-filter: blur(8px);
       padding:8px;
+    }
+    .miniMap.secondary{
+      right: auto;
+      left: 14px;
+      border-color: rgba(255,204,102,.32);
+      background: rgba(16,12,4,.88);
     }
     .miniMapHd{
       font-family:var(--mono);
@@ -982,6 +1310,25 @@
       .desktopOnly{ display:none !important; }
     }
 
+    .btn:focus-visible, .pbtn:focus-visible, .miniRow:focus-visible, .x:focus-visible,
+    input:focus-visible, select:focus-visible {
+      outline: 2px solid rgba(255,204,102,.8);
+      outline-offset: 2px;
+    }
+
+    body.compact .panelHd{ padding:8px 10px; }
+    body.compact .matrixBody, body.compact .sideBody, body.compact .rightSideBody{ padding:8px; }
+    body.compact .box{ padding:8px; margin-bottom:8px; }
+    body.compact .docItem{ padding:8px; }
+
+    body.highContrast{
+      --text:#f6fcff;
+      --muted:#d8ebf7;
+      --panelA:#020b12;
+      --panelB:#0a0714;
+      --panelC:#071015;
+    }
+
     .toast{
       position:fixed; left:50%; bottom:16px; transform:translateX(-50%);
       padding:10px 12px;
@@ -1043,54 +1390,25 @@
       <div class="brand">
         <div class="title"><span class="dot"></span>Living MITRE Repository <span class="chip" id="envChip">connectingâ€¦</span><span class="chip" title="Live status indicator"><span class="liveDot"></span> live</span></div>
         <div class="sub">
-          A living threat repository where real-world incidents are continuously mapped to <b>ATT&CK tactics</b> and <b>techniques</b>, in a Navigator-style view.
-          <b>Recommended flow:</b> 1) Filter first (search + time + severity + facets), 2) pick a document, 3) enter Hunt Mode, 4) open Attack Path to understand stage progression,
-          5) expand Hunt Pack for detections/remediation and pivots, 6) share the view with your SOC team for coordinated response.
-          This helps analysts move from noisy intel to asset-relevant, actionable decisions faster.
+          The Living MITRE Repository converts extracted security incident reports into a Navigator-style MITRE ATT&CK view. Incidents are aggregated, correlated, and mapped to ATT&CK tactics and techniques, allowing analysts to quickly move from raw reporting to structured threat context. Each tactic column contains technique cards linked to real incident reports. Selecting a report highlights the incidentâ€™s ATT&CK technique flow in the Navigator. The user can then open Attack Path for a Cyber Kill Chain view and Hunt Pack for deeper context, investigative guidance, and remediation information.
         </div>
       </div>
 
+      <div class="topNavActions">
+        <button class="btn secondary" id="shareBtn">Share</button>
+        <button class="btn beacon" id="refreshBtn" title="Critical: refresh latest intelligence dataset">Refresh</button>
+        <button class="btn secondary" id="helpBtn" title="Open platform guide">Help</button>
+        <button class="btn secondary" id="workflowBtn" title="Start guided workflow">Workflow</button>
+        <button class="btn secondary" id="compactBtn" title="Toggle compact mode">Compact</button>
+        <button class="btn secondary" id="contrastBtn" title="Toggle high contrast">Contrast</button>
+        <button class="btn secondary" id="aboutBtn" title="About this platform">About</button>
+      </div>
+
       <div class="bar">
-        <div class="ctl searchCtl" title="Search filters on doc_summary only">
-          <label>Search</label>
-          <input id="q" type="text" placeholder="doc_summary containsâ€¦" />
-        </div>
-
-        <div class="rangeCtl">
-          <label>Range</label>
-          <input id="range" type="range" min="1" max="365" value="7" step="1" />
-          <div class="v" id="rangeV">7d</div>
-          <div class="presets" id="presets">
-            <div class="pbtn active" data-days="7">7d</div>
-            <div class="pbtn" data-days="30">30d</div>
-            <div class="pbtn" data-days="90">90d</div>
-            <div class="pbtn" data-days="180">180d</div>
-            <div class="pbtn" data-days="365">365d</div>
-            <div class="pbtn" data-days="ALL">All</div>
-          </div>
-        </div>
-
-        <div class="ctl">
-          <label>Min Sev</label>
-          <select id="sev">
-            <option value="ALL" selected>All</option>
-            <option value="Moderate">Moderate+</option>
-            <option value="High">High+</option>
-          </select>
-        </div>
-
         <div class="toggle" title="Hunt Mode highlights techniques used by the selected document">
           <input type="checkbox" id="hunt" checked />
           <span>Hunt Mode</span>
         </div>
-
-        <button class="btn secondary beacon" id="pathBtn" disabled title="Critical: open attack path and hunt pack workflow">Attack Path</button>
-
-        <button class="btn beacon" id="refreshBtn" title="Critical: refresh latest intelligence dataset">Refresh</button>
-        <span class="badge" id="newBadge" style="display:none;">
-          <span class="dot"></span>
-          <span id="newBadgeTxt">New</span>
-        </span>
 
         <div class="toggle" title="Auto-check polls a small heartbeat every 60s. It does not auto-refresh the full dataset.">
           <input type="checkbox" id="autoCheck" checked />
@@ -1098,22 +1416,53 @@
         </div>
 
         <button class="btn secondary mobileOnly" id="docsBtn">Docs</button>
-
-        <button class="btn secondary" id="shareBtn">Share</button>
-        <button class="btn secondary" id="helpBtn" title="Open platform guide">Help</button>
-        <button class="btn secondary" id="aboutBtn" title="About this platform">About</button>
-
-        <button class="btn danger" id="clearAll">Reset</button>
+        <button class="btn secondary mobileOnly" id="actionsBtn">Actions</button>
+        <button class="btn secondary mobileOnly" id="jumpBtn">Jump</button>
       </div>
     </div>
   </header>
 
   <main class="main">
+    <aside class="panel rightSidePanel" id="sidePanelRight">
+      <div class="panelHd">
+        <div class="h">Operations Sidebar <span class="chip" id="sideMetaRight">â€”</span></div>
+        <div class="panelTools">
+          <div class="meta"><span class="chip">Priorities + Documents</span></div>
+        </div>
+      </div>
+
+      <div class="rightSideBody" id="sideBodyRight">
+        <div class="box prioPanel" id="prioBox">
+          <h3>Operational Priorities <span class="chip" id="prioChip">â€”</span></h3>
+          <div class="docList" id="prioList"></div>
+          <div class="muted" id="prioEmpty" style="display:none; margin-top:8px;">No priorities for current filters.</div>
+        </div>
+
+        <div class="box docsPanel" id="docsBox">
+          <h3>Documents <span class="chip" id="docCount">â€”</span></h3>
+          <div class="docList" id="docList"></div>
+          <div class="muted" id="emptyDocs" style="display:none; margin-top:8px;">No documents match the current filters.</div>
+        </div>
+      </div>
+    </aside>
+
     <section class="panel matrixPanel" id="matrixPanel">
       <div class="panelHd">
         <div class="h">Navigator <span class="chip" id="matrixMeta">â€”</span></div>
-        <div class="meta" id="selMeta">Loadingâ€¦</div>
+        <div class="panelTools">
+          <div class="meta" id="selMeta">Loadingâ€¦</div>
+          <div class="navActions">
+            <button class="btn secondary beacon" id="pathBtn" disabled title="Critical: open attack path and hunt pack workflow">Attack Path</button>
+            <button class="btn secondary" id="hidePathBtn" style="visibility:hidden;" title="Hide current attack path">Hide Path</button>
+            <span class="badge" id="newBadge" style="visibility:hidden;">
+              <span class="dot"></span>
+              <span id="newBadgeTxt">New</span>
+            </span>
+            <button class="btn danger" id="clearAll">Reset</button>
+          </div>
+        </div>
       </div>
+      <div class="activeFiltersBar" id="activeFiltersBar"></div>
 
       <div class="matrixBody">
         <div class="matrixNavMap" id="matrixNavMap">
@@ -1126,12 +1475,22 @@
           No techniques match the current filters.
         </div>
       </div>
+
+      <div class="priorityLegendMap floating" aria-label="Priority legend">
+        <div class="priorityLegendRow r1"><span>RANK 1</span><small>highest priority</small></div>
+        <div class="priorityLegendRow r2"><span>RANK 2</span><small>medium priority</small></div>
+        <div class="priorityLegendRow r3"><span>RANK 3</span><small>lower priority</small></div>
+        <div class="priorityLegendRow hit"><span>DOC-HIT</span><small>selected-doc technique</small></div>
+        <div class="priorityLegendRow fade"><span>OTHERS</span><small>de-emphasized</small></div>
+      </div>
     </section>
 
     <aside class="panel sidePanel" id="sidePanel">
       <div class="panelHd">
         <div class="h">Evidence Sidebar <span class="chip" id="sideMeta">â€”</span></div>
-        <div class="meta"><span class="chip" id="focusChip">Technique: none</span></div>
+        <div class="panelTools">
+          <div class="meta"><span class="chip" id="focusChip">Technique: none</span></div>
+        </div>
       </div>
 
       <div class="sideBody" id="sideBody">
@@ -1139,6 +1498,31 @@
 
         <div class="box aggPanel" id="aggBox">
           <h3>Aggregations <span class="chip" id="aggChip">â€”</span></h3>
+          <div class="rangeCtl aggTopFilters" id="rangeFocus">
+            <label>Range</label>
+            <input id="range" type="range" min="1" max="365" value="7" step="1" />
+            <div class="v" id="rangeV">7d</div>
+          </div>
+          <div class="presets aggPresetRow" id="presets">
+            <div class="pbtn active" data-days="7">7d</div>
+            <div class="pbtn" data-days="30">30d</div>
+            <div class="pbtn" data-days="90">90d</div>
+            <div class="pbtn" data-days="180">180d</div>
+            <div class="pbtn" data-days="365">365d</div>
+            <div class="pbtn" data-days="ALL">All</div>
+          </div>
+          <div class="ctl searchCtl aggSearch" title="Search filters on doc_summary only">
+            <label>Search</label>
+            <input id="q" type="text" placeholder="doc_summary containsâ€¦" />
+          </div>
+          <div class="ctl" id="sevCtl">
+            <label>Min Sev</label>
+            <select id="sev">
+              <option value="ALL" selected>All</option>
+              <option value="Moderate">Moderate+</option>
+              <option value="High">High+</option>
+            </select>
+          </div>
           <div class="kv" id="aggKv"></div>
           <div class="filters">
             <div class="fctl"><label>Actor</label><select id="actorF" title="Filter by actor relevant to current dataset"></select></div>
@@ -1152,31 +1536,9 @@
           </div>
         </div>
 
-
-
-        <div class="box prioPanel" id="prioBox">
-          <h3>Operational Priorities <span class="chip" id="prioChip">â€”</span></h3>
-          <div class="docList" id="prioList"></div>
-          <div class="muted" id="prioEmpty" style="display:none; margin-top:8px;">No priorities for current filters.</div>
-        </div>
-        <div class="tabsRow desktopOnly">
-          <button class="tabBtn active" id="tabBtnFocus" data-tab="focus">Focus</button>
-          <button class="tabBtn" id="tabBtnDocs" data-tab="docs">Documents</button>
-        </div>
-
-        <div class="tabPane active" id="tabFocus">
-          <div class="box focusPanel" id="focusBox">
-            <h3>Technique Focus <span class="chip" id="focusCount">â€”</span></h3>
-            <div class="kv" id="focusKv"></div>
-          </div>
-        </div>
-
-        <div class="tabPane desktopOnly" id="tabDocs">
-          <div class="box docsPanel" id="docsBox">
-            <h3>Documents <span class="chip" id="docCount">â€”</span></h3>
-            <div class="docList" id="docList"></div>
-            <div class="muted" id="emptyDocs" style="display:none; margin-top:8px;">No documents match the current filters.</div>
-          </div>
+        <div class="box focusPanel" id="focusBox">
+          <h3>Technique Focus <span class="chip" id="focusCount">â€”</span></h3>
+          <div class="kv" id="focusKv"></div>
         </div>
       </div>
     </aside>
@@ -1191,9 +1553,19 @@
       <button class="miniRow" data-target="matrixPanel" data-tone="matrix">Navigator <small>left</small></button>
       <button class="miniRow" data-target="pathStripHost" data-tone="matrix">Attack Path <small>top</small></button>
       <button class="miniRow" data-target="aggBox" data-tone="side">Aggregations <small>side</small></button>
-      <button class="miniRow" data-target="prioBox" data-tone="priority">Priorities <small>side</small></button>
       <button class="miniRow" data-target="focusBox" data-tone="side">Focus <small>side</small></button>
-      <button class="miniRow" data-target="docsBox" data-tone="docs">Documents <small>side</small></button>
+    </div>
+  </nav>
+
+  <nav class="miniMap secondary" id="miniMapRight" aria-label="Operations minimap">
+    <div class="miniMapHd">
+      <span>MINIMAP</span>
+      <small>Operations</small>
+    </div>
+    <div class="miniTrack" id="miniTrackRight">
+      <button class="miniRow" data-target="matrixPanel" data-tone="matrix">Navigator <small>center</small></button>
+      <button class="miniRow" data-target="prioBox" data-tone="priority">Priorities <small>right</small></button>
+      <button class="miniRow" data-target="docsBox" data-tone="docs">Documents <small>right</small></button>
     </div>
   </nav>
 </div>
@@ -1217,53 +1589,52 @@
       <button class="x" id="closeHelp">Ã—</button>
     </div>
     <div class="modalBd">
-      <h2 class="modalTitle">What this platform does</h2>
+      <h2 class="modalTitle">Platform description</h2>
       <div class="blockquote">
-        A living threat repository: real-world incidents and write-ups are continuously mapped to ATT&CK tactics and techniques.
-        The UI is designed for analyst flow â€” report â†’ techniques â†’ hunt/detect â†’ pivots.
+        The Living MITRE Repository is a threat-intelligence platform that transforms extracted security incident reports into a Navigator-style MITRE ATT&CK view.
+        Incidents are aggregated, correlated, and mapped to ATT&CK tactics and techniques, allowing analysts to move from raw reporting to structured, actionable threat context.
       </div>
 
       <div class="hr"></div>
 
-      <h2 class="modalTitle">Core features</h2>
-      <div class="grid2">
-        <div class="blockquote">
-          <b class="muted">Navigator view</b><br/>
-          Techniques are grouped by tactic. Clicking a technique opens its evidence context.
-          Selecting a document enables Hunt Mode and Attack Path highlighting.
-        </div>
-        <div class="blockquote">
-          <b class="muted">Filters</b><br/>
-          Range (7/30/90/180/365/All), Minimum severity, doc_summary search, and Actor/Tool pivots.
-          Filters affect the documents list and the matrix.
-        </div>
-        <div class="blockquote">
-          <b class="muted">Attack Path + Hunt Pack</b><br/>
-          Shows kill-chain phases and highlights phases that actually contain techniques.
-          Hunt Pack includes runbook, checks, pivots, coverage/gaps, exfil watch, and integrity.
-        </div>
-        <div class="blockquote">
-          <b class="muted">Fast navigation</b><br/>
-          Ctrl+K Quick Switcher, desktop tabs, and mobile docs drawer.
-        </div>
+      <h2 class="modalTitle">Navigator tactic structure</h2>
+      <div class="blockquote">
+        Reconnaissance â€¢ Resource Development â€¢ Initial Access â€¢ Execution â€¢ Persistence â€¢ Privilege Escalation â€¢ Defense Evasion â€¢ Credential Access â€¢ Discovery â€¢ Lateral Movement â€¢ Collection â€¢ Command and Control â€¢ Exfiltration â€¢ Impact.
       </div>
 
       <div class="hr"></div>
 
-      <h2 class="modalTitle">Updates / performance</h2>
+      <h2 class="modalTitle">Technique cards and report linkage</h2>
       <div class="blockquote">
-        Refresh loads the latest dataset (BOOTSTRAP_SIZE). â€œNew docsâ€ badge uses a light heartbeat poll.
-        No automatic full refresh loop â€” avoids reloading thousands of docs repeatedly.
+        Under each tactic, the platform displays technique cards. Each card represents a MITRE ATT&CK technique associated with one or more real incident reports.
+        Cards show technique ID, technique name, short description, ranking/weight indicators, and a report icon that opens mapped incidents.
+        Selecting a report highlights the ATT&CK technique chain for that incident across the Navigator.
       </div>
 
       <div class="hr"></div>
 
-      <h2 class="modalTitle">How to use this efficiently</h2>
+      <h2 class="modalTitle">How the platform works</h2>
       <div class="blockquote">
-        1) Start with <b>Operational Priorities</b> to identify top items quickly.<br/>
-        2) Select a document and open <b>Attack Path</b> to see stage-by-stage guidance.<br/>
-        3) Use <b>Actor</b>/<b>Tool</b> filters and <b>Search</b> to narrow to your environment.<br/>
-        4) Use <b>Share</b> to copy your exact filtered state for team collaboration.
+        <b>Step 1: Tailor the view</b><br/>
+        Filter by severity, actor, tool, country, sector, software, breach type, access vector, and other facets.<br/><br/>
+
+        <b>Step 2: Select time range</b><br/>
+        Choose the reporting window that fits your investigation.<br/><br/>
+
+        <b>Step 3: Review the Navigator</b><br/>
+        Technique cards are arranged by ATT&CK tactic and prioritized visually (Red=Rank 1, Yellow=Rank 2, Blue=Rank 3).<br/><br/>
+
+        <b>Step 4: Select an incident report</b><br/>
+        Selecting a report highlights the ATT&CK technique flow for that specific incident in the Navigator.<br/><br/>
+
+        <b>Step 5: Open Attack Path</b><br/>
+        View the incident through the Cyber Kill Chain for stage-by-stage operational context.<br/><br/>
+
+        <b>Step 6: Open Hunt Pack</b><br/>
+        Get deeper investigative guidance, context, and remediation-oriented information.<br/><br/>
+
+        <b>Step 7: Continue, refresh, reset, or share</b><br/>
+        Reset state, review newly available data, use Refresh to load updates, and Share to copy the exact current view for collaboration.
       </div>
 
       <div class="hr"></div>
@@ -1346,6 +1717,42 @@
 
 <div class="toast" id="toast">Updated</div>
 
+<div class="onboardingOverlay" id="onboardingOverlay"></div>
+<div class="tourSpotlight" id="tourSpotlight"></div>
+<div class="tourArrow" id="tourArrow">➜</div>
+<button class="btn danger tourDismiss" id="tourDismiss">Exit walkthrough</button>
+<div class="tourCard" id="tourCard">
+  <div class="tourStep" id="tourStep">Step 1/3</div>
+  <h4 id="tourTitle">Guided Setup</h4>
+  <p id="tourDesc"></p>
+  <label class="tourPref"><input type="checkbox" id="tourAutoStart" checked /> Auto-show workflow on page load</label>
+  <div class="tourActions">
+    <button class="btn secondary" id="tourPrev">Back</button>
+    <button class="btn secondary" id="tourSkip">Skip</button>
+    <button class="btn" id="tourNext">Next</button>
+  </div>
+</div>
+
+<dialog id="actionsModal">
+  <div class="modal">
+    <div class="modalHd">
+      <div class="h">Quick Actions</div>
+      <button class="x" id="closeActions">×</button>
+    </div>
+    <div class="modalBd" id="actionsBody"></div>
+  </div>
+</dialog>
+
+<dialog id="jumpModal">
+  <div class="modal">
+    <div class="modalHd">
+      <div class="h">Jump to Section</div>
+      <button class="x" id="closeJump">×</button>
+    </div>
+    <div class="modalBd" id="jumpBody"></div>
+  </div>
+</dialog>
+
 <script>
 /* =========================================================
    DATA
@@ -1365,6 +1772,8 @@ const STAGE_COL = {
   "Reconnaissance":"#54a6ff","Weaponization":"#b58bff","Delivery":"#00f5ff","Exploitation":"#ffcc66",
   "Installation":"#77ffb0","Command and Control":"#ff5a7a","Actions on Objectives":"#ff7a59"
 };
+
+const MAX_DOCUMENT_PANEL_ITEMS = 20;
 
 const state = {
   rangeDays: 7,
@@ -1392,12 +1801,49 @@ const state = {
 
   autoCheck: true,
   newCount: 0,
+  pathSummaryCollapsed: false,
 };
+
+const PREF_KEY_WORKFLOW_AUTO = "lmr.workflow.auto";
+
+function getWorkflowAutoStart(){
+  try{ return localStorage.getItem(PREF_KEY_WORKFLOW_AUTO) !== "0"; }
+  catch{ return true; }
+}
+function setWorkflowAutoStart(v){
+  try{ localStorage.setItem(PREF_KEY_WORKFLOW_AUTO, v ? "1" : "0"); }catch{}
+}
+
+function applyVisualPrefs(){
+  document.body.classList.toggle("compact", localStorage.getItem("lmr.compact") === "1");
+  document.body.classList.toggle("highContrast", localStorage.getItem("lmr.contrast") === "1");
+}
 
 const $ = (id)=>document.getElementById(id);
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function uniq(arr){ return Array.from(new Set(arr)); }
 function asArray(x){ if(!x) return []; return Array.isArray(x) ? x : [x]; }
+
+const TOUR_STEPS = [
+  {
+    id: "aggBox",
+    title: "Step 1: Start with Aggregations",
+    desc: "Start with Aggregations to narrow scope before analysis. Example: set Severity=High+, Actor=LockBit, and Sector=Healthcare; or search 'ransomware + exfiltration'. You can also filter by Tool, Country, Breach Type, Software, and Access Vector."
+  },
+  {
+    id: "rangeFocus",
+    title: "Step 2: Set time range",
+    desc: "Set the reporting window for your objective. Example: use 7d for active triage, 30d for campaign monitoring, 90d+ for trend analysis, or All to review full historical context."
+  },
+  {
+    id: "matrixPanel",
+    title: "Step 3: Use the Navigator",
+    desc: "Review prioritized technique cards (Rank 1/2/3), open report lists from card icons, select an incident to highlight ATT&CK flow, then open Attack Path and Hunt Pack for kill-chain context and remediation guidance."
+  }
+];
+
+let tourIdx = -1;
+let tourActive = false;
 
 function toast(msg){
   const t = $("toast");
@@ -1405,6 +1851,90 @@ function toast(msg){
   t.classList.add("show");
   setTimeout(()=>t.classList.remove("show"), 900);
 }
+
+function isAggregationCompleted(){
+  return Boolean(
+    state.q.trim() ||
+    state.actor !== "ALL" ||
+    state.tool !== "ALL" ||
+    state.dataRisk !== "ALL" ||
+    state.country !== "ALL" ||
+    state.breachType !== "ALL" ||
+    state.sector !== "ALL" ||
+    state.software !== "ALL" ||
+    state.accessVector !== "ALL"
+  );
+}
+function isTopFilterCompleted(){
+  return state.sevMin !== "ALL" || state.allTime || state.rangeDays !== 7;
+}
+function canAdvanceTourStep(){
+  if(tourIdx === 0) return isAggregationCompleted();
+  if(tourIdx === 1) return isTopFilterCompleted();
+  return true;
+}
+function endTour(){
+  tourActive = false;
+  tourIdx = -1;
+  $("onboardingOverlay").classList.remove("show");
+  $("tourSpotlight").classList.remove("show");
+  $("tourCard").classList.remove("show");
+  $("tourArrow").classList.remove("show");
+  $("tourDismiss").classList.remove("show");
+  setWorkflowAutoStart($("tourAutoStart").checked);
+}
+function positionTour(){
+  if(!tourActive || tourIdx < 0) return;
+  const target = $(TOUR_STEPS[tourIdx].id);
+  if(!target) return;
+  const rect = target.getBoundingClientRect();
+  const spot = $("tourSpotlight");
+  const card = $("tourCard");
+  const arrow = $("tourArrow");
+  const pad = 8;
+  spot.style.left = `${Math.max(6, rect.left - pad)}px`;
+  spot.style.top = `${Math.max(6, rect.top - pad)}px`;
+  spot.style.width = `${Math.min(window.innerWidth - 12, rect.width + pad*2)}px`;
+  spot.style.height = `${Math.min(window.innerHeight - 12, rect.height + pad*2)}px`;
+
+  const rightX = rect.right + 16;
+  const leftX = rect.left - Math.min(440, window.innerWidth - 24) - 16;
+  card.style.left = `${(rightX + 440 < window.innerWidth) ? rightX : Math.max(10, leftX)}px`;
+  card.style.top = `${Math.max(12, Math.min(window.innerHeight - 190, rect.top))}px`;
+
+  arrow.style.left = `${Math.max(8, rect.left - 18)}px`;
+  arrow.style.top = `${Math.max(10, rect.top + 6)}px`;
+}
+function renderTour(){
+  if(!tourActive || tourIdx < 0) return;
+  const step = TOUR_STEPS[tourIdx];
+  $("tourStep").textContent = `Step ${tourIdx+1}/${TOUR_STEPS.length}`;
+  $("tourTitle").textContent = step.title;
+  $("tourDesc").textContent = step.desc;
+  $("tourAutoStart").checked = getWorkflowAutoStart();
+  $("tourPrev").style.display = tourIdx === 0 ? "none" : "inline-flex";
+  const nextBtn = $("tourNext");
+  nextBtn.textContent = tourIdx === TOUR_STEPS.length - 1 ? "Finish" : "Next";
+  nextBtn.disabled = false;
+  $("onboardingOverlay").classList.add("show");
+  $("tourSpotlight").classList.add("show");
+  $("tourCard").classList.add("show");
+  $("tourArrow").classList.add("show");
+  $("tourDismiss").classList.add("show");
+  if(step.id === "aggBox") $("sideBody").scrollTo({ top:0, behavior:"smooth" });
+  if(step.id === "matrixPanel") $("matrixPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+  positionTour();
+}
+function startTour(){ tourActive = true; tourIdx = 0; renderTour(); }
+function nextTour(){
+  if(!canAdvanceTourStep()){
+    toast(tourIdx === 0 ? "Apply at least one Aggregations filter to continue" : "Adjust range or severity to continue");
+    return;
+  }
+  if(tourIdx >= TOUR_STEPS.length - 1) endTour();
+  else { tourIdx += 1; renderTour(); }
+}
+function prevTour(){ if(tourIdx > 0){ tourIdx -= 1; renderTour(); } }
 
 function normalizeSeverity(sev){
   const s = String(sev||"").trim().toLowerCase();
@@ -1551,6 +2081,46 @@ function stageOfTechInDoc(doc, tid){
   return null;
 }
 
+function techniqueMetaForCard(docs, tid){
+  for(const d of (docs||[])){
+    for(const a of (d.Analyses||[])){
+      const techniques = asArray(a.Techniques || []);
+      if(!techniques.includes(tid)) continue;
+      for(const t of asArray(a.Technique_Details || [])){
+        if(!t || typeof t !== "object") continue;
+        const techniqueId = String(t.technique_id || "").trim() || tid;
+        const techniqueName = String(t.technique_name || "").trim();
+        const techniqueDescription = String(t.technique_description || "").trim();
+        if(techniqueId || techniqueName || techniqueDescription){
+          return {
+            technique_id: techniqueId || "â€”",
+            technique_name: techniqueName || (TECH[tid]?.name || "â€”"),
+            technique_description: techniqueDescription || "â€”"
+          };
+        }
+      }
+      return {
+        technique_id: tid || "â€”",
+        technique_name: (TECH[tid]?.name || "â€”"),
+        technique_description: (TECH[tid]?.description || TECH[tid]?.technique_description || "â€”")
+      };
+    }
+  }
+  return {
+    technique_id: tid || "â€”",
+    technique_name: (TECH[tid]?.name || "â€”"),
+    technique_description: (TECH[tid]?.description || TECH[tid]?.technique_description || "â€”")
+  };
+}
+
+function toggleDocSelection(docId){
+  const wasSelected = (state.selectedDocId===docId);
+  state.selectedDocId = wasSelected ? null : docId;
+  if(!state.selectedDocId) state.pathOn = false;
+  syncHash();
+  render();
+}
+
 function pickTopN(mapObj, n=5){
   return Object.entries(mapObj).sort((a,b)=>b[1]-a[1]).slice(0,n);
 }
@@ -1568,6 +2138,25 @@ function heatBg(score, max){
   const b = Math.round(255*(1-t) + 176*t);
   return `rgba(${r},${g},${b},${0.10 + 0.18*t})`;
 }
+
+function rankedTechniquesForGuidance(techStats){
+  const ranked = Object.entries(techStats).map(([tid, s])=>{
+    const topDoc = (s.docs||[]).slice().sort((a,b)=>docRankScore(b)-docRankScore(a))[0] || null;
+    const topDocScore = topDoc ? docRankScore(topDoc) : 0;
+    const score = (Number(s.weight||0) * 4) + (Number(s.count||0) * 2) + topDocScore;
+    const meta = TECH[tid] || {};
+    return {
+      tid,
+      score,
+      tactic: meta.tactic || "Other",
+      name: meta.name || tid,
+      count: Number(s.count||0),
+      weight: Number(s.weight||0)
+    };
+  });
+  return ranked.sort((a,b)=>b.score-a.score);
+}
+
 function sevPill(sev){
   const n = normalizeSeverity(sev);
   const cls = (n==="High"||n==="Critical") ? "pink" : (n==="Moderate" ? "amber" : "green");
@@ -1633,12 +2222,12 @@ function setNewDocs(n){
   state.newCount = Math.max(0, Number(n||0));
   const b = $("newBadge");
   if(state.newCount > 0){
-    b.style.display = "inline-flex";
+    b.style.visibility = "visible";
     b.classList.add("hot");
     $("newBadgeTxt").textContent = `New (${state.newCount})`;
     $("refreshBtn").classList.add("hotGlow");
   }else{
-    b.style.display = "none";
+    b.style.visibility = "hidden";
     b.classList.remove("hot");
     $("newBadgeTxt").textContent = "New";
     $("refreshBtn").classList.remove("hotGlow");
@@ -1910,11 +2499,50 @@ function buildHuntPack(doc){
 /* =========================================================
    RENDER
    ========================================================= */
+function activeFilterItems(){
+  const items = [];
+  if(state.q.trim()) items.push({k:"Search", v:state.q.trim(), c:"q"});
+  if(state.sevMin !== "ALL") items.push({k:"Sev", v:state.sevMin, c:"sev"});
+  if(state.allTime) items.push({k:"Range", v:"ALL", c:"range"});
+  else if(state.rangeDays !== 7) items.push({k:"Range", v:`${state.rangeDays}d`, c:"range"});
+  [["Actor","actor"],["Tool","tool"],["Data Risk","dataRisk"],["Country","country"],["Breach","breachType"],["Sector","sector"],["Software","software"],["Access","accessVector"]].forEach(([k, key])=>{
+    if(state[key] !== "ALL") items.push({k, v:state[key], c:key});
+  });
+  return items;
+}
+
+function clearFilterChip(code){
+  if(code === "q"){ state.q = ""; $("q").value = ""; }
+  else if(code === "sev"){ state.sevMin = "ALL"; $("sev").value = "ALL"; }
+  else if(code === "range"){
+    state.allTime = false; state.rangeDays = 7;
+    $("range").value = "7"; $("rangeV").textContent = "7d"; setPresetActive("7");
+  }
+  else if(Object.prototype.hasOwnProperty.call(state, code)){
+    state[code] = "ALL";
+    const map = {actor:"actorF",tool:"toolF",dataRisk:"dataRiskF",country:"countryF",breachType:"breachTypeF",sector:"sectorF",software:"softwareF",accessVector:"accessVectorF"};
+    if(map[code]) $(map[code]).value = "ALL";
+  }
+  syncHash(); render();
+}
+
+function renderActiveFiltersBar(){
+  const host = $("activeFiltersBar");
+  const items = activeFilterItems();
+  if(!items.length){
+    host.innerHTML = `<span class="muted" style="font-size:11px;">No active filters. Use Aggregations to narrow scope.</span>`;
+    return;
+  }
+  host.innerHTML = items.map(i=>`<span class="activeFilterChip">${escapeHtml(i.k)}: ${escapeHtml(i.v)} <span class="x" data-clear="${i.c}">×</span></span>`).join("");
+  host.querySelectorAll("[data-clear]").forEach(btn=>btn.addEventListener("click", ()=> clearFilterChip(btn.getAttribute("data-clear"))));
+}
+
 function render(){
   const docs = filteredDocs();
   const techStats = buildStats(docs);
 
   $("sideMeta").textContent = `${docs.length} docs`;
+  $("sideMetaRight").textContent = `${docs.length} docs`;
   const uniqueTech = uniq(docs.flatMap(d=>d.Techniques||[])).length;
   $("matrixMeta").textContent = `${docs.length} docs â€¢ ${uniqueTech} techniques`;
 
@@ -1927,7 +2555,7 @@ function render(){
   const selDocNow = state.selectedDocId ? DOCS.find(d=>d.id===state.selectedDocId) : null;
 
   $("pathBtn").disabled = !selDocNow;
-  $("pathBtn").textContent = state.pathOn ? "Hide Attack Path" : "Attack Path";
+  $("hidePathBtn").style.visibility = state.pathOn ? "visible" : "hidden";
   $("selMeta").textContent = selDocNow ? `Doc: ${selDocNow.Title} (${fmtDate(selDocNow.Timestamp)})` : "No doc selected";
 
   buildSideFilters(docs);
@@ -1940,6 +2568,7 @@ function render(){
 
   renderDocList(docs, $("docList"), $("emptyDocs"), $("docCount"));
   renderDocList(docs, $("docListDrawer"), $("emptyDocsDrawer"), $("docCountDrawer"));
+  renderActiveFiltersBar();
 
   syncSidebarTabs();
 }
@@ -2147,7 +2776,8 @@ function renderTechniqueFocus(docs, techStats){
 function renderDocList(docs, hostEl, emptyEl, countChipEl){
   hostEl.innerHTML = "";
   emptyEl.style.display = docs.length ? "none" : "block";
-  countChipEl.textContent = `${docs.length}`;
+  const shownCount = Math.min(docs.length, MAX_DOCUMENT_PANEL_ITEMS);
+  countChipEl.textContent = `${shownCount}/${docs.length}`;
 
   const sorted = docs.slice().sort((a,b)=>{
     const da = parseDateSafe(a.Timestamp)?.getTime() || 0;
@@ -2155,7 +2785,7 @@ function renderDocList(docs, hostEl, emptyEl, countChipEl){
     return db - da;
   });
 
-  for(const d of sorted){
+  for(const d of sorted.slice(0, MAX_DOCUMENT_PANEL_ITEMS)){
     const item = document.createElement("div");
     item.className = "docItem" + (state.selectedDocId===d.id ? " active" : "") + (isRecent24h(d) ? " hotGlow" : "");
     item.innerHTML = `
@@ -2199,6 +2829,32 @@ function applyPivot(spec){
   render();
 }
 
+function buildHunterQuick(doc){
+  const ex = doc.Extracted_Entities || {};
+  const access = asArray((doc.Victim||{}).Access_Vectors).filter(Boolean);
+  const breach = asArray(ex.Breach_Types).filter(Boolean);
+  const software = asArray(ex.Software).filter(Boolean);
+  const malwareFamilies = asArray(ex.Malware_Families).filter(Boolean);
+  const domains = asArray(ex.Domains).filter(Boolean);
+  const tools = asArray((doc.Capability||{}).Tools).filter(Boolean);
+
+  const stageDetections = (doc.Analyses||[])
+    .flatMap(a=>asArray(a.Detection).map(x=>`[${a.Stage || "Unknown"}] ${x}`))
+    .filter(Boolean);
+
+  const indicators = [
+    ...asArray(doc.Detection_Rules_And_Indicators),
+    ...asArray(doc.Data_Exfiltration_Indicators),
+    ...stageDetections,
+  ].filter(Boolean);
+
+  return {
+    initial: uniq([...access, ...breach, ...software]).slice(0,6),
+    infra: uniq([...malwareFamilies, ...domains, ...tools]).slice(0,6),
+    detect: uniq(indicators).slice(0,8),
+  };
+}
+
 /* Attack path strip + hunt pack */
 function renderPathStrip(selDoc){
   const host = $("pathStripHost");
@@ -2206,13 +2862,34 @@ function renderPathStrip(selDoc){
   if(!selDoc || !state.pathOn) return;
 
   const pack = buildHuntPack(selDoc);
+  const hunterQuick = buildHunterQuick(selDoc);
 
   const stageMap = {};
+  const stageCtx = {};
   for(const st of STAGE_ORDER) stageMap[st] = new Set();
   for(const a of (selDoc.Analyses||[])){
     const stage = a.Stage || "Unknown";
     if(!stageMap[stage]) stageMap[stage] = new Set();
+    if(!stageCtx[stage]) stageCtx[stage] = { desc: [], det: [], rem: [], tac: [], tech: [] };
     for(const t of (a.Techniques||[])) stageMap[stage].add(t);
+
+    const desc = String(a.Description || "").trim();
+    if(desc && !/^no significant activity detected$/i.test(desc)) stageCtx[stage].desc.push(desc);
+
+    asArray(a.Detection).forEach(x=>{ if(x) stageCtx[stage].det.push(String(x)); });
+    asArray(a.Remediation).forEach(x=>{ if(x) stageCtx[stage].rem.push(String(x)); });
+
+    asArray(a.Tactics).forEach(t=>{
+      if(!t || typeof t !== "object") return;
+      const n = String(t.tactic_name || t.tactic_id || "").trim();
+      if(n) stageCtx[stage].tac.push(n);
+    });
+
+    asArray(a.Technique_Details).forEach(t=>{
+      if(!t || typeof t !== "object") return;
+      const n = String(t.technique_name || t.technique_id || "").trim();
+      if(n) stageCtx[stage].tech.push(n);
+    });
   }
 
   const strip = document.createElement("div");
@@ -2227,12 +2904,14 @@ function renderPathStrip(selDoc){
         <span class="chip">age ${ageDaysFrom(selDoc.Timestamp)}d</span>
         <span class="chip">tech ${(selDoc.Techniques||[]).length}</span>
         <button class="btn secondary sm" id="openDocFromPath">Open Doc</button>
+        <button class="btn secondary sm" id="togglePathSummary">${state.pathSummaryCollapsed ? "Expand" : "Summary"}</button>
         <button class="btn secondary sm" id="togglePin">${state.pathPinned ? "Unpin" : "Pin"} Attack Path</button>
         <button class="btn sm" id="togglePack">${state.packOn ? "Hide" : "Show"} Hunt Pack</button>
+        <button class="btn danger sm" id="closePathInStrip">Close Attack Path</button>
       </div>
     </div>
 
-    <div class="legendRow">
+    <div class="legendRow" style="display:${state.pathSummaryCollapsed ? "none" : "flex"};">
       <span class="chip">Phases</span>
       ${STAGE_ORDER.map(st=>{
         const has = (stageMap[st] && stageMap[st].size>0);
@@ -2245,8 +2924,22 @@ function renderPathStrip(selDoc){
       }).join("")}
     </div>
 
-    <div class="stages" id="stagesHost"></div>
-    <div id="huntPackHost"></div>
+    <div class="stages" id="stagesHost" style="display:${state.pathSummaryCollapsed ? "none" : "flex"};"></div>
+    <div class="hunterQuick" style="display:${state.pathSummaryCollapsed ? "none" : "grid"};">
+      <div class="hunterBox">
+        <h4>Initial Access Hypotheses</h4>
+        ${hunterQuick.initial.length ? `<ul class="hunterList">${hunterQuick.initial.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>` : `<div class="muted">No direct hypotheses.</div>`}
+      </div>
+      <div class="hunterBox">
+        <h4>Malware / Infrastructure Watch</h4>
+        ${hunterQuick.infra.length ? `<ul class="hunterList">${hunterQuick.infra.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>` : `<div class="muted">No infrastructure indicators.</div>`}
+      </div>
+      <div class="hunterBox">
+        <h4>Detection Priorities</h4>
+        ${hunterQuick.detect.length ? `<ul class="hunterList">${hunterQuick.detect.map(x=>`<li>${escapeHtml(shortTitle(x, 130))}</li>`).join("")}</ul>` : `<div class="muted">No explicit detections.</div>`}
+      </div>
+    </div>
+    <div id="huntPackHost" style="display:${state.pathSummaryCollapsed ? "none" : "block"};"></div>
   `;
   host.appendChild(strip);
 
@@ -2269,6 +2962,12 @@ function renderPathStrip(selDoc){
     const color = STAGE_COL[stage] || "#77ffb0";
     const ts = Array.from(stageMap[stage] || []).sort();
     const has = ts.length > 0;
+    const ctx = stageCtx[stage] || { desc: [], det: [], rem: [], tac: [], tech: [] };
+    const descTop = uniq(ctx.desc).slice(0,1);
+    const detTop = uniq(ctx.det).slice(0,2);
+    const remTop = uniq(ctx.rem).slice(0,2);
+    const tacTop = uniq(ctx.tac).slice(0,2);
+    const techTop = uniq(ctx.tech).slice(0,2);
 
     const col = document.createElement("div");
     col.className = "stage " + (has ? "hasTech" : "noTech");
@@ -2287,6 +2986,13 @@ function renderPathStrip(selDoc){
             : `<span class="chip">â€”</span>`
         }
       </div>
+      <div class="stageCtx">
+        ${descTop.length ? `<div class="muted">${escapeHtml(shortTitle(descTop[0], 110))}</div>` : `<div class="muted">No explicit narrative for this phase.</div>`}
+        ${tacTop.length ? `<div class="muted">Tactics: ${escapeHtml(tacTop.join("; "))}</div>` : ``}
+        ${techTop.length ? `<div class="muted">Techniques: ${escapeHtml(techTop.join("; "))}</div>` : ``}
+        ${detTop.length ? `<ul>${detTop.map(x=>`<li>Detect: ${escapeHtml(shortTitle(x, 95))}</li>`).join("")}</ul>` : ``}
+        ${remTop.length ? `<ul>${remTop.map(x=>`<li>Respond: ${escapeHtml(shortTitle(x, 95))}</li>`).join("")}</ul>` : ``}
+      </div>
     `;
     stagesHost.appendChild(col);
   }
@@ -2301,6 +3007,10 @@ function renderPathStrip(selDoc){
   });
 
   strip.querySelector("#openDocFromPath").addEventListener("click", ()=> openDocModal(selDoc));
+  strip.querySelector("#togglePathSummary").addEventListener("click", ()=>{
+    state.pathSummaryCollapsed = !state.pathSummaryCollapsed;
+    render();
+  });
   strip.querySelector("#togglePin").addEventListener("click", ()=>{
     state.pathPinned = !state.pathPinned;
     syncHash();
@@ -2308,6 +3018,12 @@ function renderPathStrip(selDoc){
   });
   strip.querySelector("#togglePack").addEventListener("click", ()=>{
     state.packOn = !state.packOn;
+    syncHash();
+    render();
+  });
+  strip.querySelector("#closePathInStrip").addEventListener("click", ()=>{
+    state.pathOn = false;
+    state.packOn = false;
     syncHash();
     render();
   });
@@ -2489,6 +3205,9 @@ function renderHuntPackHTML(doc, pack){
 function renderMatrix(docs, techStats, selDoc){
   const host = $("matrix");
   host.innerHTML = "";
+  const guidance = rankedTechniquesForGuidance(techStats);
+  const recommendedIds = new Set(guidance.slice(0,3).map(g=>g.tid));
+  const recommendedRank = new Map(guidance.slice(0,3).map((g, idx)=>[g.tid, idx + 1]));
 
   const byTactic = {};
   for(const tid of Object.keys(techStats)){
@@ -2496,7 +3215,12 @@ function renderMatrix(docs, techStats, selDoc){
     const tac = meta.tactic || "Other";
     byTactic[tac] = byTactic[tac] || [];
     const s = techStats[tid];
-    byTactic[tac].push({tid, name: meta.name, tactic: tac, ...s});
+    byTactic[tac].push({
+      tid,
+      name: meta.name,
+      tactic: tac,
+      ...s
+    });
   }
 
   const maxW = Math.max(0, ...Object.values(techStats).map(s=>s.weight));
@@ -2519,12 +3243,13 @@ function renderMatrix(docs, techStats, selDoc){
     col.className = "tacticCol";
     col.id = tacticDomId(tac);
 
-    // glow tactic column if it contains techniques for selected doc/path
-    if(selDoc){
-      const docTech = new Set(selDoc.Techniques||[]);
-      const hasDocTech = state.huntOn && list.some(x=>docTech.has(x.tid));
-      const hasPathTech = state.pathOn && list.some(x=>stageFor[x.tid]);
-      if(hasDocTech || hasPathTech) col.classList.add("hotPanel");
+    const ranksInCol = list
+      .map(x=>recommendedRank.get(x.tid))
+      .filter(x=>x===1 || x===2 || x===3)
+      .sort((a,b)=>a-b);
+    if(ranksInCol.length){
+      const bestRank = ranksInCol[0];
+      col.classList.add(bestRank===1 ? "rank1bg" : (bestRank===2 ? "rank2bg" : "rank3bg"));
     }
 
     col.innerHTML = `
@@ -2546,12 +3271,25 @@ function renderMatrix(docs, techStats, selDoc){
     }
 
     for(const t of list){
-      const topDocs = (t.docs||[]).slice().sort((a,b)=>docRankScore(b)-docRankScore(a)).slice(0,5);
-
+      const topDocs = (t.docs||[]).slice().sort((a,b)=>docRankScore(b)-docRankScore(a)).slice(0,10);
       const card = document.createElement("div");
       card.className = "techCard";
+      card.setAttribute("data-tech-id", t.tid);
       if(state.selectedTechId===t.tid) card.classList.add("active");
       card.style.background = heatBg(t.weight, maxW);
+      if(recommendedIds.has(t.tid)){
+        card.classList.add("recommended");
+        const rankIdx = recommendedRank.get(t.tid) || 3;
+        card.classList.add(rankIdx===1 ? "rank1" : (rankIdx===2 ? "rank2" : "rank3"));
+        // Apply rank tint directly on the card background (inline) so it remains visible.
+        if(rankIdx===1){
+          card.style.background = "linear-gradient(180deg, rgba(255,132,132,.46), rgba(255,132,132,.26), rgba(7,26,34,.40))";
+        }else if(rankIdx===2){
+          card.style.background = "linear-gradient(180deg, rgba(255,222,120,.44), rgba(255,222,120,.24), rgba(7,26,34,.40))";
+        }else{
+          card.style.background = "linear-gradient(180deg, rgba(134,186,255,.40), rgba(134,186,255,.22), rgba(7,26,34,.40))";
+        }
+      }
 
       const isDocHit = !!(selDoc && state.huntOn && (selDoc.Techniques||[]).includes(t.tid));
       if(isDocHit) card.classList.add("docHit");
@@ -2565,31 +3303,48 @@ function renderMatrix(docs, techStats, selDoc){
       if(selDoc && state.huntOn && !isDocHit) card.classList.add("dim");
       if(selDoc && state.pathOn && !isPathHit) card.classList.add("dim");
 
+      const techMeta = techniqueMetaForCard(t.docs, t.tid);
+
+      const rank = recommendedRank.get(t.tid) || null;
+      const rankBadge = rank ? `<span class="rankBadge ${rank===1?"r1":rank===2?"r2":"r3"}">R${rank}</span>` : "";
+
       card.innerHTML = `
         <div class="row1">
-          <span class="tid">${t.tid}</span>
+          <span class="tid">${escapeHtml(techMeta.technique_id)}</span>
+          ${rankBadge}
           <span class="score">w:${t.weight} â€¢ n:${t.count}</span>
+          <button class="cardDocBtn" type="button" title="Show top documents" data-doc-toggle>📄</button>
         </div>
-        <div class="name" title="${escapeHtml(t.name || t.tid)}">${escapeHtml(t.name || t.tid)}</div>
-        <div style="margin-top:7px; display:flex; gap:6px; flex-wrap:wrap;">
-          ${topDocs.slice(0,2).map(d=>`<span class="pill ${facetToneBySeverity(d.Severity)}" style="cursor:pointer; max-width:100%;" data-doc="${d.id}" title="${escapeHtml(d.Title)}\n${escapeHtml(firstActionHint(d))}">[${escapeHtml(normalizeSeverity(d.Severity))}][P${Number(d.priority_score||0)}][${ageBadgeFrom(d.Timestamp)}] ${escapeHtml(shortTitle(d.Title, 18))}</span>`).join("")}
+        <div style="font-weight:900; font-size:12px; line-height:1.25; margin-bottom:4px;">${escapeHtml(techMeta.technique_name)}</div>
+        <div style="font-size:11px; line-height:1.25; color:rgba(210,222,255,.86);">${escapeHtml(shortTitle(techMeta.technique_description, 160))}</div>
+        <div class="cardDocMenu" data-doc-menu style="display:none;">
+          ${topDocs.length
+            ? topDocs.map(d=>`<button class="cardDocItem" type="button" data-doc-id="${escapeHtml(d.id)}" title="${escapeHtml(d.Title)}">${escapeHtml(shortTitle(d.Title, 80))}</button>`).join("")
+            : `<div class="muted" style="font-size:11px; padding:4px;">No related documents.</div>`}
         </div>
-        <div style="margin-top:6px; color:rgba(210,222,255,.82); font-size:11px; line-height:1.25;">${topDocs.slice(0,1).map(d=>escapeHtml(shortTitle(firstActionHint(d), 84))).join("") || ""}</div>
       `;
 
       card.addEventListener("click", (e)=>{
-        const btn = e.target.closest("[data-doc]");
-        if(btn) return;
+        if(e.target.closest("[data-doc-toggle]") || e.target.closest("[data-doc-id]")) return;
         state.selectedTechId = (state.selectedTechId===t.tid) ? null : t.tid;
         syncHash();
         render();
       });
 
-      card.querySelectorAll("[data-doc]").forEach(el=>{
-        el.addEventListener("click", (e)=>{
+      const menu = card.querySelector("[data-doc-menu]");
+      const toggleBtn = card.querySelector("[data-doc-toggle]");
+      if(toggleBtn && menu){
+        toggleBtn.addEventListener("click", (e)=>{
           e.stopPropagation();
-          const doc = DOCS.find(x=>x.id===el.getAttribute("data-doc"));
-          openDocModal(doc);
+          const isOpen = menu.style.display !== "none";
+          menu.style.display = isOpen ? "none" : "flex";
+        });
+      }
+
+      card.querySelectorAll("[data-doc-id]").forEach(btn=>{
+        btn.addEventListener("click", (e)=>{
+          e.stopPropagation();
+          toggleDocSelection(btn.getAttribute("data-doc-id"));
         });
       });
 
@@ -2690,10 +3445,7 @@ $("closeModal").addEventListener("click", ()=> $("docModal").close());
 
 /* Tabs */
 function syncSidebarTabs(){
-  $("tabBtnFocus").classList.toggle("active", state.sideTab==="focus");
-  $("tabBtnDocs").classList.toggle("active", state.sideTab==="docs");
-  $("tabFocus").classList.toggle("active", state.sideTab==="focus");
-  $("tabDocs").classList.toggle("active", state.sideTab==="docs");
+  // Tabs were removed from desktop sidebars; keep as a no-op for compatibility.
 }
 document.querySelectorAll("[data-tab]").forEach(btn=>{
   btn.addEventListener("click", ()=>{
@@ -2804,21 +3556,75 @@ $("shareBtn").addEventListener("click", async ()=>{
 
 /* Help/About */
 $("helpBtn").addEventListener("click", ()=> $("helpModal").showModal());
+$("workflowBtn").addEventListener("click", ()=> startTour());
 $("aboutBtn").addEventListener("click", ()=> $("aboutModal").showModal());
+$("compactBtn").addEventListener("click", ()=>{
+  const next = !(localStorage.getItem("lmr.compact") === "1");
+  localStorage.setItem("lmr.compact", next ? "1" : "0");
+  applyVisualPrefs();
+});
+$("contrastBtn").addEventListener("click", ()=>{
+  const next = !(localStorage.getItem("lmr.contrast") === "1");
+  localStorage.setItem("lmr.contrast", next ? "1" : "0");
+  applyVisualPrefs();
+});
 $("closeHelp").addEventListener("click", ()=> $("helpModal").close());
 $("closeAbout").addEventListener("click", ()=> $("aboutModal").close());
 
+function openActionsModal(){
+  const host = $("actionsBody");
+  host.innerHTML = `
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      <button class="btn secondary" data-act="share">Share</button>
+      <button class="btn secondary" data-act="refresh">Refresh</button>
+      <button class="btn secondary" data-act="help">Help</button>
+      <button class="btn secondary" data-act="workflow">Workflow</button>
+      <button class="btn secondary" data-act="about">About</button>
+    </div>
+  `;
+  host.querySelectorAll("[data-act]").forEach(btn=>btn.addEventListener("click", ()=>{
+    const a = btn.getAttribute("data-act");
+    if(a==="share") $("shareBtn").click();
+    if(a==="refresh") $("refreshBtn").click();
+    if(a==="help") $("helpBtn").click();
+    if(a==="workflow") $("workflowBtn").click();
+    if(a==="about") $("aboutBtn").click();
+    $("actionsModal").close();
+  }));
+  $("actionsModal").showModal();
+}
+function openJumpModal(){
+  const host = $("jumpBody");
+  host.innerHTML = `
+    <div style="display:grid; grid-template-columns:1fr; gap:8px;">
+      <button class="btn secondary" data-target="aggBox">Aggregations</button>
+      <button class="btn secondary" data-target="matrixPanel">Navigator</button>
+      <button class="btn secondary" data-target="prioBox">Priorities</button>
+      <button class="btn secondary" data-target="docsBox">Documents</button>
+    </div>
+  `;
+  host.querySelectorAll("[data-target]").forEach(btn=>btn.addEventListener("click", ()=>{
+    scrollMiniTarget(btn.getAttribute("data-target"));
+    $("jumpModal").close();
+  }));
+  $("jumpModal").showModal();
+}
+$("actionsBtn").addEventListener("click", openActionsModal);
+$("jumpBtn").addEventListener("click", openJumpModal);
+$("closeActions").addEventListener("click", ()=> $("actionsModal").close());
+$("closeJump").addEventListener("click", ()=> $("jumpModal").close());
+
 /* Wiring */
-$("sev").addEventListener("change", ()=>{ state.sevMin = $("sev").value; syncHash(); render(); });
-$("q").addEventListener("input", ()=>{ state.q = $("q").value; syncHash(); render(); });
-$("actorF").addEventListener("change", ()=>{ state.actor = $("actorF").value; syncHash(); render(); });
-$("toolF").addEventListener("change", ()=>{ state.tool = $("toolF").value; syncHash(); render(); });
-$("dataRiskF").addEventListener("change", ()=>{ state.dataRisk = $("dataRiskF").value; syncHash(); render(); });
-$("countryF").addEventListener("change", ()=>{ state.country = $("countryF").value; syncHash(); render(); });
-$("breachTypeF").addEventListener("change", ()=>{ state.breachType = $("breachTypeF").value; syncHash(); render(); });
-$("sectorF").addEventListener("change", ()=>{ state.sector = $("sectorF").value; syncHash(); render(); });
-$("softwareF").addEventListener("change", ()=>{ state.software = $("softwareF").value; syncHash(); render(); });
-$("accessVectorF").addEventListener("change", ()=>{ state.accessVector = $("accessVectorF").value; syncHash(); render(); });
+$("sev").addEventListener("change", ()=>{ state.sevMin = $("sev").value; syncHash(); render(); if(tourActive) renderTour(); });
+$("q").addEventListener("input", ()=>{ state.q = $("q").value; syncHash(); render(); if(tourActive) renderTour(); });
+$("actorF").addEventListener("change", ()=>{ state.actor = $("actorF").value; syncHash(); render(); if(tourActive) renderTour(); });
+$("toolF").addEventListener("change", ()=>{ state.tool = $("toolF").value; syncHash(); render(); if(tourActive) renderTour(); });
+$("dataRiskF").addEventListener("change", ()=>{ state.dataRisk = $("dataRiskF").value; syncHash(); render(); if(tourActive) renderTour(); });
+$("countryF").addEventListener("change", ()=>{ state.country = $("countryF").value; syncHash(); render(); if(tourActive) renderTour(); });
+$("breachTypeF").addEventListener("change", ()=>{ state.breachType = $("breachTypeF").value; syncHash(); render(); if(tourActive) renderTour(); });
+$("sectorF").addEventListener("change", ()=>{ state.sector = $("sectorF").value; syncHash(); render(); if(tourActive) renderTour(); });
+$("softwareF").addEventListener("change", ()=>{ state.software = $("softwareF").value; syncHash(); render(); if(tourActive) renderTour(); });
+$("accessVectorF").addEventListener("change", ()=>{ state.accessVector = $("accessVectorF").value; syncHash(); render(); if(tourActive) renderTour(); });
 
 $("hunt").addEventListener("change", ()=>{
   state.huntOn = $("hunt").checked;
@@ -2828,8 +3634,15 @@ $("hunt").addEventListener("change", ()=>{
 
 $("pathBtn").addEventListener("click", ()=>{
   if($("pathBtn").disabled) return;
-  state.pathOn = !state.pathOn;
+  state.pathOn = true;
   if(state.pathOn) state.packOn = false;
+  if(tourActive && TOUR_STEPS[tourIdx]?.id === "matrixPanel" && state.pathOn) endTour();
+  syncHash(); render();
+});
+
+$("hidePathBtn").addEventListener("click", ()=>{
+  if(!state.pathOn) return;
+  state.pathOn = false;
   syncHash(); render();
 });
 
@@ -2884,6 +3697,7 @@ $("range").addEventListener("input", ()=>{
     setPresetActive(String(state.rangeDays));
     syncHash();
     render();
+    if(tourActive) renderTour();
   }, 60);
 });
 $("presets").addEventListener("click", (e)=>{
@@ -2902,7 +3716,15 @@ $("presets").addEventListener("click", (e)=>{
     setPresetActive(String(state.rangeDays));
   }
   syncHash(); render();
+  if(tourActive) renderTour();
 });
+
+$("tourNext").addEventListener("click", nextTour);
+$("tourPrev").addEventListener("click", prevTour);
+$("tourSkip").addEventListener("click", endTour);
+$("tourDismiss").addEventListener("click", endTour);
+$("tourAutoStart").addEventListener("change", ()=> setWorkflowAutoStart($("tourAutoStart").checked));
+window.addEventListener("resize", ()=>{ if(tourActive) positionTour(); });
 function setPresetActive(val){
   document.querySelectorAll(".pbtn").forEach(b=>b.classList.remove("active"));
   const btn = Array.from(document.querySelectorAll(".pbtn")).find(x=>x.getAttribute("data-days")===val);
@@ -2916,12 +3738,31 @@ document.addEventListener("keydown", (e)=>{
 
   if(e.key === "/" && !typing){ e.preventDefault(); $("q").focus(); }
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k"){ e.preventDefault(); openSwitcher(); }
+  if(!typing && e.key.toLowerCase() === "p"){
+    e.preventDefault();
+    if(e.shiftKey){
+      state.pathPinned = !state.pathPinned;
+      syncHash(); render();
+    }else if(state.selectedDocId){
+      state.pathOn = !state.pathOn;
+      if(state.pathOn) state.packOn = false;
+      syncHash(); render();
+    }
+  }
+  if(!typing && e.key.toLowerCase() === "h"){
+    if(state.pathOn){
+      e.preventDefault();
+      state.packOn = !state.packOn;
+      syncHash(); render();
+    }
+  }
   if(e.key === "Escape"){
     if($("docModal").open) $("docModal").close();
     if($("helpModal").open) $("helpModal").close();
     if($("aboutModal").open) $("aboutModal").close();
     if($("switcherModal").open) $("switcherModal").close();
     closeDrawer();
+    if(tourActive) endTour();
   }
 });
 
@@ -2990,9 +3831,14 @@ window.addEventListener("resize", ()=>{ if(state.pathOn) render(); });
 function scrollMiniTarget(targetId){
   const el = $(targetId);
   if(!el) return;
-  const sideTargets = new Set(["aggBox","prioBox","focusBox","docsBox"]);
-  if(sideTargets.has(targetId)){
+  const leftSideTargets = new Set(["aggBox","focusBox"]);
+  const rightSideTargets = new Set(["prioBox","docsBox"]);
+  if(leftSideTargets.has(targetId)){
     $("sideBody").scrollTo({ top: Math.max(0, el.offsetTop - 12), behavior: "smooth" });
+    return;
+  }
+  if(rightSideTargets.has(targetId)){
+    $("sideBodyRight").scrollTo({ top: Math.max(0, el.offsetTop - 12), behavior: "smooth" });
     return;
   }
   if(targetId === "pathStripHost"){
@@ -3003,19 +3849,25 @@ function scrollMiniTarget(targetId){
 }
 
 function setMiniActiveByScroll(){
-  const rows = Array.from(document.querySelectorAll("#miniTrack .miniRow"));
-  rows.forEach(r=>r.classList.remove("active"));
-  const sideBody = $("sideBody");
-  const scrollTop = sideBody.scrollTop;
-  const ordered = ["aggBox","prioBox","focusBox","docsBox"];
-  let activeId = "matrixPanel";
-  for(const id of ordered){
-    const el = $(id);
-    if(!el || el.offsetParent === null) continue;
-    if(scrollTop >= (el.offsetTop - 30)) activeId = id;
-  }
-  const row = rows.find(r=>r.getAttribute("data-target")===activeId) || rows[0];
-  if(row) row.classList.add("active");
+  const setActive = (trackId, scrollContainerId, orderedIds)=>{
+    const rows = Array.from(document.querySelectorAll(`#${trackId} .miniRow`));
+    rows.forEach(r=>r.classList.remove("active"));
+    const scroller = $(scrollContainerId);
+    let activeId = "matrixPanel";
+    if(scroller){
+      const scrollTop = scroller.scrollTop;
+      for(const id of orderedIds){
+        const el = $(id);
+        if(!el || el.offsetParent === null) continue;
+        if(scrollTop >= (el.offsetTop - 30)) activeId = id;
+      }
+    }
+    const row = rows.find(r=>r.getAttribute("data-target")===activeId) || rows[0];
+    if(row) row.classList.add("active");
+  };
+
+  setActive("miniTrack", "sideBody", ["aggBox","focusBox"]);
+  setActive("miniTrackRight", "sideBodyRight", ["prioBox","docsBox"]);
 }
 
 $("miniTrack").addEventListener("click", (e)=>{
@@ -3023,14 +3875,22 @@ $("miniTrack").addEventListener("click", (e)=>{
   if(!btn) return;
   scrollMiniTarget(btn.getAttribute("data-target"));
 });
+$("miniTrackRight").addEventListener("click", (e)=>{
+  const btn = e.target.closest(".miniRow");
+  if(!btn) return;
+  scrollMiniTarget(btn.getAttribute("data-target"));
+});
 $("sideBody").addEventListener("scroll", setMiniActiveByScroll, {passive:true});
+$("sideBodyRight").addEventListener("scroll", setMiniActiveByScroll, {passive:true});
 setMiniActiveByScroll();
 
 /* Init */
 (async function init(){
+  applyVisualPrefs();
   state.sideTab = "focus";
   syncSidebarTabs();
   await bootstrapFromServer({reason:"Loading"});
+  if(getWorkflowAutoStart()) startTour();
   if(state.autoCheck) startHeartbeat();
 })();
 </script>

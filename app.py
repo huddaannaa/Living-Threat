@@ -509,21 +509,78 @@ def normalize_doc(hit: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, str]]:
             det = _normalize_analysis_text(a.get("Detection"))
             rem = _normalize_analysis_text(a.get("Remediation"))
 
+            tactics_raw = a.get("Tactics") or []
+            tactics_out: List[Dict[str, str]] = []
+            if isinstance(tactics_raw, list):
+                for t in tactics_raw:
+                    if not isinstance(t, dict):
+                        continue
+                    tid = _norm(t.get("tactic_id") or t.get("id") or t.get("tactic"))
+                    tnm = _norm(t.get("tactic_name") or t.get("name"))
+                    tdesc = _normalize_analysis_text(
+                        t.get("tactic_description") or t.get("description")
+                    )
+                    if not any([tid, tnm, tdesc]):
+                        continue
+                    tactics_out.append(
+                        {
+                            "tactic_id": tid,
+                            "tactic_name": tnm,
+                            "tactic_description": tdesc,
+                        }
+                    )
+
             techs_raw = a.get("Techniques") or []
             techs: List[str] = []
+            technique_details: List[Dict[str, str]] = []
             if isinstance(techs_raw, list):
                 for t in techs_raw:
                     if isinstance(t, str):
                         tid = _norm(t)
                         if tid:
                             techs.append(tid)
+                            technique_details.append(
+                                {
+                                    "technique_id": tid,
+                                    "technique_name": tech_name_hints.get(tid) or "",
+                                    "technique_description": "",
+                                }
+                            )
                     elif isinstance(t, dict):
                         tid = _norm(t.get("technique_id") or t.get("id") or t.get("technique"))
                         tnm = _norm(t.get("technique_name") or t.get("name"))
+                        tdesc = _normalize_analysis_text(
+                            t.get("technique_description") or t.get("description")
+                        )
                         if tid:
                             techs.append(tid)
                             if tnm and tid not in tech_name_hints:
                                 tech_name_hints[tid] = tnm
+                            technique_details.append(
+                                {
+                                    "technique_id": tid,
+                                    "technique_name": tnm,
+                                    "technique_description": tdesc,
+                                }
+                            )
+
+            # Deduplicate while preserving order, preferring richer metadata entries.
+            technique_details_out: List[Dict[str, str]] = []
+            seen_tid = set()
+            for td in technique_details:
+                tid = _norm(td.get("technique_id"))
+                if not tid:
+                    continue
+                if tid in seen_tid:
+                    continue
+                seen_tid.add(tid)
+                technique_details_out.append(
+                    {
+                        "technique_id": tid,
+                        "technique_name": _norm(td.get("technique_name")) or tech_name_hints.get(tid) or "",
+                        "technique_description": _normalize_analysis_text(td.get("technique_description")),
+                    }
+                )
 
             analyses_out.append(
                 {
@@ -531,7 +588,9 @@ def normalize_doc(hit: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, str]]:
                     "Description": desc,
                     "Detection": det,
                     "Remediation": rem,
+                    "Tactics": tactics_out,
                     "Techniques": list(dict.fromkeys(techs)),
+                    "Technique_Details": technique_details_out,
                 }
             )
 
