@@ -648,6 +648,24 @@
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap:10px;
       align-items:start;
+      position:relative;
+    }
+    .matrixFlowLayer{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      z-index:3;
+      overflow:visible;
+    }
+    .matrixFlowPath{
+      fill:none;
+      stroke:rgba(0,245,255,.58);
+      stroke-width:1.9;
+      stroke-linecap:round;
+      stroke-dasharray:4 4;
+      filter: drop-shadow(0 0 8px rgba(0,245,255,.28));
     }
     .tacticCol{
       border-radius: 14px;
@@ -733,6 +751,48 @@
       border-color: rgba(255,225,112,.80);
       box-shadow: 0 0 0 1px rgba(255,225,112,.46), 0 0 30px rgba(255,225,112,.34);
       background: linear-gradient(180deg, rgba(255,225,112,.34), rgba(255,225,112,.16), rgba(7,26,34,.40));
+    }
+    .techCard.flowTarget{
+      outline:1px dashed rgba(0,245,255,.44);
+      outline-offset:1px;
+    }
+    .techCard.flowDown::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      bottom:-17px;
+      transform:translateX(-50%);
+      width:2px;
+      height:12px;
+      background: linear-gradient(180deg, rgba(0,245,255,.66), rgba(0,245,255,.14));
+      pointer-events:none;
+      z-index:2;
+    }
+    .techCard.flowDown::before{
+      content:"";
+      position:absolute;
+      left:50%;
+      bottom:-21px;
+      transform:translateX(-50%);
+      border-left:5px solid transparent;
+      border-right:5px solid transparent;
+      border-top:6px solid rgba(0,245,255,.76);
+      filter: drop-shadow(0 0 8px rgba(0,245,255,.28));
+      pointer-events:none;
+      z-index:2;
+    }
+    .flowJump{
+      margin-top:7px;
+      font-family:var(--mono);
+      font-size:10.4px;
+      color:rgba(182,244,255,.90);
+      border:1px dashed rgba(0,245,255,.30);
+      border-radius:9px;
+      background:rgba(0,245,255,.08);
+      padding:4px 6px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
     .rankBadge{
       font-family:var(--mono);
@@ -1470,7 +1530,7 @@
           <div class="matrixNavTrack" id="matrixNavTrack"></div>
         </div>
         <div id="pathStripHost"></div>
-        <div class="tacticGrid" id="matrix"></div>
+        <div class="tacticGrid" id="matrix" aria-label="Incident technique flow map"></div>
         <div class="muted" id="emptyMatrix" style="display:none; padding:10px 2px;">
           No techniques match the current filters.
         </div>
@@ -2079,6 +2139,79 @@ function stageOfTechInDoc(doc, tid){
     if((a.Techniques||[]).includes(tid)) return a.Stage || null;
   }
   return null;
+}
+
+function buildIncidentFlow(doc){
+  const analyses = (doc?.Analyses||[]).slice().sort((a,b)=>stageIndex(a.Stage)-stageIndex(b.Stage));
+  const ordered = [];
+  for(const a of analyses){
+    const stageTechs = [];
+    for(const td of asArray(a.Technique_Details)){
+      const tid = String(td?.technique_id || "").trim();
+      if(tid) stageTechs.push(tid);
+    }
+    for(const tid of asArray(a.Techniques)){
+      const norm = String(tid || "").trim();
+      if(norm) stageTechs.push(norm);
+    }
+    for(const tid of stageTechs){
+      if(!ordered.includes(tid)) ordered.push(tid);
+    }
+  }
+  const nextByTid = {};
+  const prevByTid = {};
+  for(let i=0;i<ordered.length-1;i++){
+    nextByTid[ordered[i]] = ordered[i+1];
+    prevByTid[ordered[i+1]] = ordered[i];
+  }
+  return { ordered, nextByTid, prevByTid };
+}
+
+function renderIncidentFlowOverlay(host, incidentFlow){
+  if(!host) return;
+  let layer = host.querySelector('.matrixFlowLayer');
+  if(!layer){
+    layer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    layer.classList.add('matrixFlowLayer');
+    layer.setAttribute('aria-hidden', 'true');
+    host.appendChild(layer);
+  }
+
+  const sequence = incidentFlow?.ordered || [];
+  if(sequence.length < 2){
+    layer.innerHTML = '';
+    return;
+  }
+
+  const hostRect = host.getBoundingClientRect();
+  const cards = {};
+  host.querySelectorAll('.techCard[data-tech-id]').forEach(el=>{ cards[el.getAttribute('data-tech-id')] = el; });
+
+  const paths = [];
+  for(let i=0;i<sequence.length-1;i++){
+    const src = cards[sequence[i]];
+    const dst = cards[sequence[i+1]];
+    if(!src || !dst) continue;
+
+    const sRect = src.getBoundingClientRect();
+    const dRect = dst.getBoundingClientRect();
+    const sx = sRect.left - hostRect.left + (sRect.width/2);
+    const sy = sRect.top - hostRect.top + sRect.height;
+    const ex = dRect.left - hostRect.left + (dRect.width/2);
+    const ey = dRect.top - hostRect.top;
+    const bend = Math.max(22, Math.abs(ex-sx)*0.18 + Math.abs(ey-sy)*0.22);
+
+    paths.push(`<path class="matrixFlowPath" d="M ${sx.toFixed(1)} ${sy.toFixed(1)} C ${sx.toFixed(1)} ${(sy+bend).toFixed(1)}, ${ex.toFixed(1)} ${(ey-bend).toFixed(1)}, ${ex.toFixed(1)} ${ey.toFixed(1)}" marker-end="url(#flowArrowHead)" />`);
+  }
+
+  layer.innerHTML = `
+    <defs>
+      <marker id="flowArrowHead" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L9,4.5 L0,9 z" fill="rgba(0,245,255,.82)"></path>
+      </marker>
+    </defs>
+    ${paths.join('')}
+  `;
 }
 
 function techniqueMetaForCard(docs, tid){
@@ -3226,6 +3359,7 @@ function renderMatrix(docs, techStats, selDoc){
   const maxW = Math.max(0, ...Object.values(techStats).map(s=>s.weight));
 
   const stageFor = {};
+  const incidentFlow = (selDoc && state.huntOn) ? buildIncidentFlow(selDoc) : { ordered: [], nextByTid: {}, prevByTid: {} };
   if(selDoc){
     for(const tid of (selDoc.Techniques||[])){
       const st = stageOfTechInDoc(selDoc, tid);
@@ -3303,6 +3437,16 @@ function renderMatrix(docs, techStats, selDoc){
       if(selDoc && state.huntOn && !isDocHit) card.classList.add("dim");
       if(selDoc && state.pathOn && !isPathHit) card.classList.add("dim");
 
+      const nextTid = incidentFlow.nextByTid[t.tid] || null;
+      const prevTid = incidentFlow.prevByTid[t.tid] || null;
+      if(prevTid) card.classList.add("flowTarget");
+      const nextTactic = nextTid ? (TECH[nextTid]?.tactic || "Other") : null;
+      const nextIsSameTactic = !!(nextTid && nextTactic === t.tactic);
+      if(nextIsSameTactic) card.classList.add("flowDown");
+      const flowJumpText = (nextTid && !nextIsSameTactic)
+        ? `→ ${nextTid} • ${nextTactic}`
+        : "";
+
       const techMeta = techniqueMetaForCard(t.docs, t.tid);
 
       const rank = recommendedRank.get(t.tid) || null;
@@ -3317,6 +3461,7 @@ function renderMatrix(docs, techStats, selDoc){
         </div>
         <div style="font-weight:900; font-size:12px; line-height:1.25; margin-bottom:4px;">${escapeHtml(techMeta.technique_name)}</div>
         <div style="font-size:11px; line-height:1.25; color:rgba(210,222,255,.86);">${escapeHtml(shortTitle(techMeta.technique_description, 160))}</div>
+        ${flowJumpText ? `<div class="flowJump" title="Incident flow continues to ${escapeHtml(nextTid)} in ${escapeHtml(nextTactic)}">${escapeHtml(flowJumpText)}</div>` : ""}
         <div class="cardDocMenu" data-doc-menu style="display:none;">
           ${topDocs.length
             ? topDocs.map(d=>`<button class="cardDocItem" type="button" data-doc-id="${escapeHtml(d.id)}" title="${escapeHtml(d.Title)}">${escapeHtml(shortTitle(d.Title, 80))}</button>`).join("")
@@ -3369,6 +3514,7 @@ function renderMatrix(docs, techStats, selDoc){
     });
   }
 
+  requestAnimationFrame(()=>renderIncidentFlowOverlay(host, incidentFlow));
   $("emptyMatrix").style.display = rendered ? "none" : "block";
 }
 
@@ -3825,7 +3971,7 @@ function loadHash(){
   }
 }
 window.addEventListener("hashchange", ()=>{ loadHash(); render(); });
-window.addEventListener("resize", ()=>{ if(state.pathOn) render(); });
+window.addEventListener("resize", ()=>{ if(state.pathOn || (state.huntOn && state.selectedDocId)) render(); });
 
 /* Minimap */
 function scrollMiniTarget(targetId){
