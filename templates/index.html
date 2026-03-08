@@ -2172,14 +2172,15 @@ function renderIncidentFlowOverlay(host, incidentFlow){
   host.querySelectorAll('.techCard[data-tech-id]').forEach(el=>{ cards[el.getAttribute('data-tech-id')] = el; });
 
   const laneCounts = {};
-  const laneFor = (key)=>{
+  const nextBaseLane = (key)=>{
     const idx = laneCounts[key] || 0;
     laneCounts[key] = idx + 1;
     if(idx===0) return 0;
     const step = Math.ceil(idx/2);
     const sign = (idx % 2 === 1) ? 1 : -1;
-    return sign * step * 10;
+    return sign * step * 12;
   };
+  const laneVariants = [0, 14, -14, 28, -28, 42, -42];
 
   const borderPoint = (rect, dx, dy)=>{
     const cx = rect.left - hostRect.left + rect.width/2;
@@ -2191,6 +2192,13 @@ function renderIncidentFlowOverlay(host, incidentFlow){
     const scale = 1 / Math.max(ax/hw, ay/hh);
     return { x: cx + dx*scale, y: cy + dy*scale };
   };
+
+  const rectOverlapArea = (a, b)=>{
+    const w = Math.max(0, Math.min(a.maxX, b.maxX) - Math.max(a.minX, b.minX));
+    const h = Math.max(0, Math.min(a.maxY, b.maxY) - Math.max(a.minY, b.minY));
+    return w * h;
+  };
+  const occupied = [];
 
   const paths = [];
   for(let i=0;i<sequence.length-1;i++){
@@ -2228,14 +2236,55 @@ function renderIncidentFlowOverlay(host, incidentFlow){
     const px = -uy;
     const py = ux;
 
-    const lane = laneFor(`${srcCol}->${dstCol}`);
-    const midX = (sx + ex) / 2;
-    const midY = (sy + ey) / 2;
-    const curve = Math.min(56, 14 + dist * 0.16) + Math.abs(lane) * 0.25;
-    const cx = midX + px * (curve + lane);
-    const cy = midY + py * (curve + lane);
+    const longJump = Math.abs(dx) > 260;
+    const baseLane = nextBaseLane(`${srcCol}->${dstCol}`);
 
-    paths.push(`<path class="matrixFlowPath" d="M ${sx.toFixed(1)} ${sy.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}" marker-end="url(#flowArrowHead)" />`);
+    let chosen = null;
+    for(const laneDelta of laneVariants){
+      const lane = baseLane + laneDelta;
+      const midX = (sx + ex) / 2;
+      const midY = (sy + ey) / 2;
+      const curve = Math.min(62, 16 + dist * 0.16) + Math.abs(lane) * 0.22;
+
+      let d = '';
+      let samplePts = [];
+      if(longJump){
+        const mx = midX + px * (lane * 0.6);
+        const my = midY + py * (curve + lane);
+        const c1x = sx + ux * Math.min(46, dist * 0.25) + px * lane;
+        const c1y = sy + uy * Math.min(46, dist * 0.25) + py * lane;
+        const c2x = ex - ux * Math.min(46, dist * 0.25) + px * lane;
+        const c2y = ey - uy * Math.min(46, dist * 0.25) + py * lane;
+        d = `M ${sx.toFixed(1)} ${sy.toFixed(1)} Q ${c1x.toFixed(1)} ${c1y.toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)} Q ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`;
+        samplePts = [
+          {x:sx,y:sy}, {x:c1x,y:c1y}, {x:mx,y:my}, {x:c2x,y:c2y}, {x:ex,y:ey}
+        ];
+      }else{
+        const cx = midX + px * (curve + lane);
+        const cy = midY + py * (curve + lane);
+        d = `M ${sx.toFixed(1)} ${sy.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}`;
+        samplePts = [{x:sx,y:sy},{x:cx,y:cy},{x:ex,y:ey}];
+      }
+
+      const xs = samplePts.map(p=>p.x);
+      const ys = samplePts.map(p=>p.y);
+      const bbox = {
+        minX: Math.min(...xs) - 12,
+        maxX: Math.max(...xs) + 12,
+        minY: Math.min(...ys) - 12,
+        maxY: Math.max(...ys) + 12,
+      };
+      const areaHit = occupied.reduce((sum, o)=>sum + rectOverlapArea(bbox, o), 0);
+      if(areaHit < 6400){
+        chosen = { d, bbox };
+        break;
+      }
+      if(!chosen) chosen = { d, bbox };
+    }
+
+    if(!chosen) continue;
+    occupied.push(chosen.bbox);
+    paths.push(`<path class="matrixFlowPath" d="${chosen.d}" marker-end="url(#flowArrowHead)" />`);
   }
 
   layer.innerHTML = `
