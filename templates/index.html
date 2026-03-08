@@ -757,31 +757,6 @@
       outline:1px dashed rgba(0,245,255,.44);
       outline-offset:1px;
     }
-    .techCard.flowDown::after{
-      content:"";
-      position:absolute;
-      left:50%;
-      bottom:-17px;
-      transform:translateX(-50%);
-      width:2px;
-      height:12px;
-      background: linear-gradient(180deg, rgba(0,245,255,.66), rgba(0,245,255,.14));
-      pointer-events:none;
-      z-index:2;
-    }
-    .techCard.flowDown::before{
-      content:"";
-      position:absolute;
-      left:50%;
-      bottom:-21px;
-      transform:translateX(-50%);
-      border-left:5px solid transparent;
-      border-right:5px solid transparent;
-      border-top:6px solid rgba(0,245,255,.76);
-      filter: drop-shadow(0 0 8px rgba(0,245,255,.28));
-      pointer-events:none;
-      z-index:2;
-    }
     .flowJump{
       margin-top:7px;
       font-family:var(--mono);
@@ -2196,6 +2171,27 @@ function renderIncidentFlowOverlay(host, incidentFlow){
   const cards = {};
   host.querySelectorAll('.techCard[data-tech-id]').forEach(el=>{ cards[el.getAttribute('data-tech-id')] = el; });
 
+  const laneCounts = {};
+  const laneFor = (key)=>{
+    const idx = laneCounts[key] || 0;
+    laneCounts[key] = idx + 1;
+    if(idx===0) return 0;
+    const step = Math.ceil(idx/2);
+    const sign = (idx % 2 === 1) ? 1 : -1;
+    return sign * step * 10;
+  };
+
+  const borderPoint = (rect, dx, dy)=>{
+    const cx = rect.left - hostRect.left + rect.width/2;
+    const cy = rect.top - hostRect.top + rect.height/2;
+    const hw = rect.width/2;
+    const hh = rect.height/2;
+    const ax = Math.abs(dx) || 0.0001;
+    const ay = Math.abs(dy) || 0.0001;
+    const scale = 1 / Math.max(ax/hw, ay/hh);
+    return { x: cx + dx*scale, y: cy + dy*scale };
+  };
+
   const paths = [];
   for(let i=0;i<sequence.length-1;i++){
     const src = cards[sequence[i]];
@@ -2207,20 +2203,39 @@ function renderIncidentFlowOverlay(host, incidentFlow){
     const srcCol = src.closest('.tacticCol')?.id || '';
     const dstCol = dst.closest('.tacticCol')?.id || '';
 
-    const lane = ((i % 5) - 2) * 7;
-    const sx = sRect.left - hostRect.left + (sRect.width/2) + lane;
-    const sy = Math.max(sRect.top - hostRect.top + sRect.height - 4, (headerFloor[srcCol] || 0) + 8);
-    const ex = dRect.left - hostRect.left + (dRect.width/2) - lane;
-    const dstTop = dRect.top - hostRect.top + 5;
-    const ey = Math.max(dstTop, (headerFloor[dstCol] || 0) + 8);
+    const scx = sRect.left - hostRect.left + sRect.width/2;
+    const scy = sRect.top - hostRect.top + sRect.height/2;
+    const dcx = dRect.left - hostRect.left + dRect.width/2;
+    const dcy = dRect.top - hostRect.top + dRect.height/2;
+    const vx = dcx - scx;
+    const vy = dcy - scy;
 
-    const vertical = Math.abs(ey - sy);
-    const horizontal = Math.abs(ex - sx);
-    const bend = Math.max(24, vertical * 0.30 + horizontal * 0.16);
-    const c1x = sx + lane * 0.45;
-    const c2x = ex - lane * 0.45;
+    const start = borderPoint(sRect, vx, vy);
+    const end = borderPoint(dRect, -vx, -vy);
 
-    paths.push(`<path class="matrixFlowPath" d="M ${sx.toFixed(1)} ${sy.toFixed(1)} C ${c1x.toFixed(1)} ${(sy+bend).toFixed(1)}, ${c2x.toFixed(1)} ${(ey-bend).toFixed(1)}, ${ex.toFixed(1)} ${ey.toFixed(1)}" marker-end="url(#flowArrowHead)" />`);
+    const minSrcY = (headerFloor[srcCol] || 0) + 6;
+    const minDstY = (headerFloor[dstCol] || 0) + 6;
+    const sx = start.x;
+    const sy = Math.max(start.y, minSrcY);
+    const ex = end.x;
+    const ey = Math.max(end.y, minDstY);
+
+    const dx = ex - sx;
+    const dy = ey - sy;
+    const dist = Math.hypot(dx, dy) || 1;
+    const ux = dx / dist;
+    const uy = dy / dist;
+    const px = -uy;
+    const py = ux;
+
+    const lane = laneFor(`${srcCol}->${dstCol}`);
+    const midX = (sx + ex) / 2;
+    const midY = (sy + ey) / 2;
+    const curve = Math.min(56, 14 + dist * 0.16) + Math.abs(lane) * 0.25;
+    const cx = midX + px * (curve + lane);
+    const cy = midY + py * (curve + lane);
+
+    paths.push(`<path class="matrixFlowPath" d="M ${sx.toFixed(1)} ${sy.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}" marker-end="url(#flowArrowHead)" />`);
   }
 
   layer.innerHTML = `
@@ -3462,7 +3477,6 @@ function renderMatrix(docs, techStats, selDoc){
       if(prevTid) card.classList.add("flowTarget");
       const nextTactic = nextTid ? (TECH[nextTid]?.tactic || "Other") : null;
       const nextIsSameTactic = !!(nextTid && nextTactic === t.tactic);
-      if(nextIsSameTactic) card.classList.add("flowDown");
       const flowJumpText = (nextTid && !nextIsSameTactic)
         ? `→ ${nextTid} • ${nextTactic}`
         : "";
