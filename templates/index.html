@@ -287,8 +287,10 @@
       gap:12px;
       min-height:0;
     }
-    body.rightSidebarCollapsed .main{ grid-template-columns: 360px 1fr; }
+    body.rightSidebarCollapsed .main{ grid-template-columns: 1fr 360px; }
     body.rightSidebarCollapsed #sidePanelRight{ display:none; }
+    body.rightSidebarCollapsed #matrixPanel{ grid-column:1; }
+    body.rightSidebarCollapsed #sidePanel{ grid-column:2; }
     @media (max-width: 1060px){
       body{ overflow:auto; }
       .main{ grid-template-columns: 1fr; }
