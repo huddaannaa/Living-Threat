@@ -3139,7 +3139,7 @@ function renderSelectedDocBox(selDoc){
   $("sdOpen").addEventListener("click", ()=> openDocModal(selDoc));
   $("sdTogglePath").addEventListener("click", ()=>{
     state.pathOn = !state.pathOn;
-    if(state.pathOn) state.packOn = false;
+    if(state.pathOn){ state.packOn = false; state.pathPinned = true; }
     syncHash();
     render();
   });
@@ -3313,7 +3313,8 @@ function renderPathStrip(selDoc){
   }
 
   const strip = document.createElement("div");
-  strip.className = `pathStrip hotPanel ${state.pathPinned ? "pinned" : ""}`.trim();
+  state.pathPinned = true;
+  strip.className = "pathStrip hotPanel pinned";
   strip.innerHTML = `
     <div class="row">
       <div class="title">
@@ -3325,7 +3326,6 @@ function renderPathStrip(selDoc){
         <span class="chip">tech ${(selDoc.Techniques||[]).length}</span>
         <button class="btn secondary sm" id="openDocFromPath">Open Doc</button>
         <button class="btn secondary sm" id="togglePathSummary">${state.pathSummaryCollapsed ? "Expand" : "Summary"}</button>
-        <button class="btn secondary sm" id="togglePin">${state.pathPinned ? "Unpin" : "Pin"} Attack Path</button>
         <button class="btn sm" id="togglePack">${state.packOn ? "Hide" : "Show"} Hunt Pack</button>
         <button class="btn danger sm" id="closePathInStrip">Close Attack Path</button>
       </div>
@@ -3429,11 +3429,6 @@ function renderPathStrip(selDoc){
   strip.querySelector("#openDocFromPath").addEventListener("click", ()=> openDocModal(selDoc));
   strip.querySelector("#togglePathSummary").addEventListener("click", ()=>{
     state.pathSummaryCollapsed = !state.pathSummaryCollapsed;
-    render();
-  });
-  strip.querySelector("#togglePin").addEventListener("click", ()=>{
-    state.pathPinned = !state.pathPinned;
-    syncHash();
     render();
   });
   strip.querySelector("#togglePack").addEventListener("click", ()=>{
@@ -3867,7 +3862,7 @@ function openDocModal(doc){
   $("togglePathFromModal").addEventListener("click", ()=>{
     state.selectedDocId = doc.id;
     state.pathOn = !state.pathOn;
-    if(state.pathOn) state.packOn = false;
+    if(state.pathOn){ state.packOn = false; state.pathPinned = true; }
     syncHash();
     render();
     $("docModal").close();
@@ -4170,7 +4165,7 @@ $("toggleCardsBtn").addEventListener("click", ()=>{
 $("pathBtn").addEventListener("click", ()=>{
   if($("pathBtn").disabled) return;
   state.pathOn = true;
-  if(state.pathOn) state.packOn = false;
+  if(state.pathOn){ state.packOn = false; state.pathPinned = true; }
   if(tourActive && TOUR_STEPS[tourIdx]?.id === "matrixPanel" && state.pathOn) endTour();
   syncHash(); render();
 });
@@ -4277,11 +4272,12 @@ document.addEventListener("keydown", (e)=>{
   if(!typing && e.key.toLowerCase() === "p"){
     e.preventDefault();
     if(e.shiftKey){
-      state.pathPinned = !state.pathPinned;
+      state.pathPinned = true;
+      toast("Attack Path remains fixed at top");
       syncHash(); render();
     }else if(state.selectedDocId){
       state.pathOn = !state.pathOn;
-      if(state.pathOn) state.packOn = false;
+      if(state.pathOn){ state.packOn = false; state.pathPinned = true; }
       syncHash(); render();
     }
   }
@@ -4342,6 +4338,7 @@ function loadHash(){
   state.huntOn = (p.get("hunt") || "1") === "1";
   state.pathOn = (p.get("path") || "0") === "1";
   state.pathPinned = (p.get("pathpin") || "1") === "1";
+  if(state.pathOn) state.pathPinned = true;
   state.packOn = (p.get("pack") || "0") === "1";
   state.selectedDocId = p.get("doc");
   state.selectedTechId = p.get("tech");
