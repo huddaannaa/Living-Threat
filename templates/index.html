@@ -1548,22 +1548,22 @@
   <main class="main">
     <aside class="panel rightSidePanel" id="sidePanelRight">
       <div class="panelHd">
-        <div class="h">Operations Sidebar <span class="chip" id="sideMetaRight">â€”</span></div>
+        <div class="h">Incidents Sidebar <span class="chip" id="sideMetaRight">â€”</span></div>
         <div class="panelTools">
-          <div class="meta"><span class="chip">Priorities + Documents</span></div>
-          <button class="btn secondary sm" id="toggleRightSidebarBtn" title="Collapse or expand Operations Sidebar">Collapse</button>
+          <div class="meta"><span class="chip">Priorities + Incidents</span></div>
+          <button class="btn secondary sm" id="toggleRightSidebarBtn" title="Collapse or expand Incidents Sidebar">Collapse</button>
         </div>
       </div>
 
       <div class="rightSideBody" id="sideBodyRight">
         <div class="box prioPanel" id="prioBox">
-          <h3>Operational Priorities <span class="chip" id="prioChip">â€”</span></h3>
+          <h3>Prioritized incidents <span class="chip" id="prioChip">â€”</span></h3>
           <div class="docList" id="prioList"></div>
           <div class="muted" id="prioEmpty" style="display:none; margin-top:8px;">No priorities for current filters.</div>
         </div>
 
         <div class="box docsPanel" id="docsBox">
-          <h3>Documents <span class="chip" id="docCount">â€”</span></h3>
+          <h3>Incidents <span class="chip" id="docCount">â€”</span></h3>
           <div class="docList" id="docList"></div>
           <div class="muted" id="emptyDocs" style="display:none; margin-top:8px;">No documents match the current filters.</div>
         </div>
@@ -1576,7 +1576,7 @@
         <div class="panelTools">
           <div class="meta" id="selMeta">Loadingâ€¦</div>
           <div class="navActions">
-            <button class="btn secondary sm" id="toggleRightSidebarBtnMain" title="Show or hide Operations Sidebar">Hide Ops</button>
+            <button class="btn secondary sm" id="toggleRightSidebarBtnMain" title="Show or hide Incidents Sidebar">Hide Incidents</button>
             <button class="btn danger" id="toggleCardsBtn" title="Show/Hide top documents for all technique cards">Expand cards</button>
             <button class="btn secondary beacon" id="pathBtn" disabled title="Critical: open attack path and hunt pack workflow">Attack Path</button>
             <button class="btn secondary" id="hidePathBtn" style="visibility:hidden;" title="Hide current attack path">Hide Path</button>
@@ -1683,17 +1683,7 @@
     </div>
   </nav>
 
-  <nav class="miniMap secondary" id="miniMapRight" aria-label="Operations minimap">
-    <div class="miniMapHd">
-      <span>MINIMAP</span>
-      <small>Operations</small>
-    </div>
-    <div class="miniTrack" id="miniTrackRight">
-      <button class="miniRow" data-target="matrixPanel" data-tone="matrix">Navigator <small>center</small></button>
-      <button class="miniRow" data-target="prioBox" data-tone="priority">Priorities <small>right</small></button>
-      <button class="miniRow" data-target="docsBox" data-tone="docs">Documents <small>right</small></button>
-    </div>
-  </nav>
+  
 </div>
 
 <!-- DOC MODAL -->
@@ -2028,7 +2018,7 @@ function applyRightSidebarState(){
   const b1 = $("toggleRightSidebarBtn");
   const b2 = $("toggleRightSidebarBtnMain");
   if(b1) b1.textContent = collapsed ? "Expand" : "Collapse";
-  if(b2) b2.textContent = collapsed ? "Show Ops" : "Hide Ops";
+  if(b2) b2.textContent = collapsed ? "Show Incidents" : "Hide Incidents";
 }
 function setRightSidebarCollapsed(v){
   localStorage.setItem("lmr.rightCollapsed", v ? "1" : "0");
@@ -4402,7 +4392,6 @@ function setMiniActiveByScroll(){
   };
 
   setActive("miniTrack", "sideBody", ["aggBox","focusBox"]);
-  setActive("miniTrackRight", "sideBodyRight", ["prioBox","docsBox"]);
 }
 
 $("miniTrack").addEventListener("click", (e)=>{
@@ -4410,13 +4399,7 @@ $("miniTrack").addEventListener("click", (e)=>{
   if(!btn) return;
   scrollMiniTarget(btn.getAttribute("data-target"));
 });
-$("miniTrackRight").addEventListener("click", (e)=>{
-  const btn = e.target.closest(".miniRow");
-  if(!btn) return;
-  scrollMiniTarget(btn.getAttribute("data-target"));
-});
 $("sideBody").addEventListener("scroll", setMiniActiveByScroll, {passive:true});
-$("sideBodyRight").addEventListener("scroll", setMiniActiveByScroll, {passive:true});
 setMiniActiveByScroll();
 
 /* Init */
