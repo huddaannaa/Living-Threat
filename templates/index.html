@@ -1551,7 +1551,6 @@
         <div class="h">Incidents Sidebar <span class="chip" id="sideMetaRight">â€”</span></div>
         <div class="panelTools">
           <div class="meta"><span class="chip">Priorities + Incidents</span></div>
-          <button class="btn secondary sm" id="toggleRightSidebarBtn" title="Collapse or expand Incidents Sidebar">Collapse</button>
         </div>
       </div>
 
@@ -2010,14 +2009,12 @@ function applyVisualPrefs(){
   document.body.classList.toggle("highContrast", localStorage.getItem("lmr.contrast") === "1");
 }
 function isRightSidebarCollapsed(){
-  return localStorage.getItem("lmr.rightCollapsed") === "1";
+  return localStorage.getItem("lmr.rightCollapsed") !== "0";
 }
 function applyRightSidebarState(){
   const collapsed = isRightSidebarCollapsed();
   document.body.classList.toggle("rightSidebarCollapsed", collapsed);
-  const b1 = $("toggleRightSidebarBtn");
   const b2 = $("toggleRightSidebarBtnMain");
-  if(b1) b1.textContent = collapsed ? "Expand" : "Collapse";
   if(b2) b2.textContent = collapsed ? "Show Incidents" : "Hide Incidents";
 }
 function setRightSidebarCollapsed(v){
@@ -4126,7 +4123,6 @@ $("jumpBtn").addEventListener("click", openJumpModal);
 $("closeActions").addEventListener("click", ()=> $("actionsModal").close());
 $("closeJump").addEventListener("click", ()=> $("jumpModal").close());
 
-$("toggleRightSidebarBtn").addEventListener("click", toggleRightSidebar);
 $("toggleRightSidebarBtnMain").addEventListener("click", toggleRightSidebar);
 
 /* Wiring */
