@@ -107,12 +107,29 @@
       backdrop-filter: blur(10px);
     }
     .topbarInner{
+      position:relative;
       padding:12px clamp(14px, 2vw, 28px);
+      padding-right: 420px;
       display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
     }
 
-    .topNavActions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-left:auto; justify-content:flex-end; }
+    .topNavActions{ position:absolute; top:12px; right:clamp(14px, 2vw, 28px); display:flex; align-items:center; gap:8px; flex-wrap:nowrap; justify-content:flex-end; }
     .topNavActions .btn{ white-space:nowrap; }
+    .moreMenu{ position:relative; }
+    .moreMenu > summary{ list-style:none; }
+    .moreMenu > summary::-webkit-details-marker{ display:none; }
+    .morePanel{
+      position:absolute; right:0; top:calc(100% + 8px);
+      min-width:170px;
+      display:flex; flex-direction:column; gap:6px;
+      padding:8px;
+      border-radius:12px;
+      border:1px solid rgba(0,245,255,.22);
+      background: rgba(4,14,22,.96);
+      box-shadow: var(--shadow);
+      z-index:45;
+    }
+    .morePanel .btn{ justify-content:flex-start; width:100%; }
     .brand{ display:flex; flex-direction:column; gap:4px; min-width:260px; flex:1; }
     .brand .title{ display:flex; align-items:center; gap:10px; font-weight:900; letter-spacing:.25px; font-size:14px; }
     .brand .title .dot{
@@ -122,7 +139,7 @@
     }
     .brand .sub{ color:rgba(214,247,255,.68); font-size:12px; line-height:1.25; max-width: 980px; }
 
-    .bar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; min-width:520px; }
+    .bar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; min-width:520px; margin-left:auto; }
 
     .ctl, .rangeCtl, .toggle{
       display:flex; align-items:center; gap:8px;
@@ -272,6 +289,10 @@
       gap:12px;
       min-height:0;
     }
+    body.rightSidebarCollapsed .main{ grid-template-columns: 1fr 360px; }
+    body.rightSidebarCollapsed #sidePanelRight{ display:none; }
+    body.rightSidebarCollapsed #matrixPanel{ grid-column:1; }
+    body.rightSidebarCollapsed #sidePanel{ grid-column:2; }
     @media (max-width: 1060px){
       body{ overflow:auto; }
       .main{ grid-template-columns: 1fr; }
@@ -282,10 +303,11 @@
     }
 
     @media (max-width: 860px){
-      .topbarInner{ padding:10px 12px; }
+      .topbarInner{ padding:10px 12px; padding-right:12px; }
       .brand{ min-width:0; width:100%; }
       .brand .sub{ font-size:11px; }
-      .topNavActions{ width:100%; }
+      .topNavActions{ position:static; width:100%; flex-wrap:wrap; }
+      .morePanel{ right:0; left:auto; }
       .bar{
         min-width:0;
         width:100%;
@@ -389,10 +411,10 @@
     }
     .matrixNavMap{
       position: sticky;
-      top: 0;
+      top: 8px;
       z-index: 6;
       border:1px solid rgba(0,245,255,.16);
-      background: rgba(2,12,18,.78);
+      background: rgba(2,12,18,.60);
       border-radius: 12px;
       padding:8px;
       margin-bottom:10px;
@@ -404,11 +426,25 @@
       color:rgba(214,247,255,.70);
       margin-bottom:6px;
     }
+    .matrixDocContext{
+      position: sticky;
+      top: 52px;
+      z-index: 5;
+      border:1px solid rgba(0,245,255,.24);
+      background: rgba(2,12,18,.30);
+      border-radius: 12px;
+      padding:10px 12px;
+      margin-bottom:10px;
+      backdrop-filter: blur(8px);
+    }
+    .matrixDocContext .title{ font-weight:800; font-size:12px; color:rgba(214,247,255,.96); line-height:1.3; }
+    .matrixDocContext .summary{ margin-top:6px; font-size:11px; line-height:1.4; color:rgba(214,247,255,.90); }
+    .matrixDocContext .meta{ margin-top:8px; justify-content:flex-start; text-align:left; }
     .matrixNavTrack{ display:flex; gap:6px; flex-wrap:wrap; }
     .priorityLegendMap{
       border:1px solid rgba(0,245,255,.20);
       border-radius:14px;
-      background: rgba(2,8,14,.86);
+      background: rgba(2,8,14,.60);
       box-shadow: var(--shadow);
       backdrop-filter: blur(8px);
       padding:8px;
@@ -574,10 +610,10 @@
       margin-bottom:10px;
       overflow:hidden;
     }
-    .box.selDocPanel{ border-color: rgba(0,245,255,.28); background: linear-gradient(180deg, rgba(0,245,255,.09), rgba(0,0,0,.14)); }
+     .box.selDocPanel{ border-color: rgba(255,90,122,.30); background: linear-gradient(180deg, rgba(255,90,122,.12), rgba(0,0,0,.14)); }
     .box.aggPanel{ border-color: rgba(119,255,176,.28); background: linear-gradient(180deg, rgba(119,255,176,.10), rgba(0,0,0,.14)); }
     .box.prioPanel{ border-color: rgba(255,90,122,.30); background: linear-gradient(180deg, rgba(255,90,122,.12), rgba(0,0,0,.14)); }
-    .box.focusPanel{ border-color: rgba(181,139,255,.30); background: linear-gradient(180deg, rgba(181,139,255,.11), rgba(0,0,0,.14)); }
+    .box.focusPanel{ border-color: rgba(255,90,122,.30); background: linear-gradient(180deg, rgba(255,90,122,.12), rgba(0,0,0,.14)); }
     .box.docsPanel{ border-color: rgba(255,204,102,.30); background: linear-gradient(180deg, rgba(255,204,102,.11), rgba(0,0,0,.14)); }
     .box h3{
       margin:0 0 8px;
@@ -749,26 +785,39 @@
       background: linear-gradient(180deg, rgba(134,186,255,.40), rgba(134,186,255,.22), rgba(7,26,34,.40));
     }
     .techCard.docHit{
-      border-color: rgba(255,225,112,.80);
-      box-shadow: 0 0 0 1px rgba(255,225,112,.46), 0 0 30px rgba(255,225,112,.34);
-      background: linear-gradient(180deg, rgba(255,225,112,.34), rgba(255,225,112,.16), rgba(7,26,34,.40));
+      border-color: rgba(35,207,199,.88);
+      box-shadow: 0 0 0 1px rgba(35,207,199,.52), 0 0 30px rgba(35,207,199,.36);
+      background: linear-gradient(180deg, rgba(35,207,199,.38), rgba(35,207,199,.20), rgba(7,26,34,.40));
     }
     .techCard.flowTarget{
       outline:1px dashed rgba(0,245,255,.44);
       outline-offset:1px;
     }
-    .flowJump{
-      margin-top:7px;
+    .flowSeqBadge{
+      position:absolute;
+      left:-10px;
+      top:50%;
+      transform:translateY(-50%);
+      width:24px;
+      height:24px;
+      border-radius:999px;
+      border:1px solid rgba(255,225,112,.76);
+      background: radial-gradient(circle at 30% 30%, rgba(255,245,179,.92), rgba(255,164,79,.74));
+      color:#210e00;
       font-family:var(--mono);
-      font-size:10.4px;
-      color:rgba(182,244,255,.90);
-      border:1px dashed rgba(0,245,255,.30);
-      border-radius:9px;
-      background:rgba(0,245,255,.08);
-      padding:4px 6px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      font-size:11px;
+      font-weight:900;
+      display:grid;
+      place-items:center;
+      box-shadow: 0 0 0 1px rgba(255,164,79,.30), 0 0 20px rgba(255,164,79,.36);
+      z-index:3;
+    }
+    .flowSeqBadge.glow{
+      animation-name: seqPulse;
+      animation-duration: calc(var(--flowCycle, 1800ms) * var(--flowCount, 1));
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
+      animation-delay: calc(var(--flowDelay, 0) * var(--flowCycle, 1800ms));
     }
     .rankBadge{
       font-family:var(--mono);
@@ -1319,6 +1368,48 @@
       color:rgba(214,247,255,.62);
       display:flex; gap:10px; flex-wrap:wrap;
     }
+    .caseModal{ max-width:980px; }
+    .caseHero{
+      border:1px solid rgba(255,214,97,.24);
+      border-radius:14px;
+      padding:12px;
+      background: linear-gradient(180deg, rgba(255,214,97,.10), rgba(255,214,97,.03));
+      margin-bottom:12px;
+    }
+    .caseGrid{ display:grid; grid-template-columns:1fr; gap:10px; }
+    .caseCard{
+      border:1px solid rgba(0,245,255,.18);
+      border-radius:14px;
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+    .caseCard summary{
+      list-style:none;
+      cursor:pointer;
+      padding:10px 12px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background: linear-gradient(180deg, rgba(0,245,255,.08), rgba(0,245,255,.02));
+    }
+    .caseCard summary::-webkit-details-marker{ display:none; }
+    .caseNum{
+      min-width:22px;
+      height:22px;
+      border-radius:999px;
+      border:1px solid rgba(255,225,112,.70);
+      background: radial-gradient(circle at 30% 30%, rgba(255,245,179,.92), rgba(255,164,79,.74));
+      color:#210e00;
+      font-family:var(--mono);
+      font-size:11px;
+      font-weight:900;
+      display:grid;
+      place-items:center;
+    }
+    .caseBody{ padding:12px; display:grid; gap:8px; }
+    .caseBody p{ margin:0; line-height:1.45; }
+
     .switcherList{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
     .swItem{
       border-radius: 14px;
@@ -1393,6 +1484,12 @@
       100%{ box-shadow: 0 0 0 1px rgba(255,90,122,.24), 0 0 12px rgba(255,214,97,.14); }
     }
 
+    @keyframes seqPulse{
+      0%, 8%{ transform: translateY(-50%) scale(1); box-shadow: 0 0 0 1px rgba(255,164,79,.30), 0 0 10px rgba(255,164,79,.24); }
+      18%, 28%{ transform: translateY(-50%) scale(1.18); box-shadow: 0 0 0 1px rgba(255,245,179,.85), 0 0 26px rgba(255,225,112,.82); }
+      36%, 100%{ transform: translateY(-50%) scale(1); box-shadow: 0 0 0 1px rgba(255,164,79,.30), 0 0 10px rgba(255,164,79,.24); }
+    }
+
     @keyframes pulse{
       0%{ transform:scale(1); opacity:1; }
       50%{ transform:scale(1.05); opacity:.72; }
@@ -1426,31 +1523,27 @@
       <div class="brand">
         <div class="title"><span class="dot"></span>Living MITRE Repository <span class="chip" id="envChip">connectingâ€¦</span><span class="chip" title="Live status indicator"><span class="liveDot"></span> live</span></div>
         <div class="sub">
-          A living threat repository where real-world incidents are continuously mapped to ATT&CK tactics and techniques, in a Navigator-style view. Incidents are aggregated, correlated, and mapped to ATT&CK tactics and techniques, allowing analysts to quickly move from raw reporting to structured threat context. Each tactic column contains technique cards linked to real incident reports. Selecting a report highlights the incidentâ€™s ATT&CK technique flow in the Navigator. The user can then open Attack Path for a Cyber Kill Chain view and Hunt Pack for deeper context, investigative guidance, and remediation information.
+          A living threat repository where real-world incidents are continuously mapped to ATT&amp;CK tactics and techniques, in a Navigator-style view. Filter the data, open a report, highlight its technique chain, and move into Attack Path and Hunt Pack for deeper operational context.
         </div>
       </div>
 
       <div class="topNavActions">
         <button class="btn secondary" id="shareBtn">Share</button>
         <button class="btn beacon" id="refreshBtn" title="Critical: refresh latest intelligence dataset">Refresh</button>
-        <button class="btn secondary" id="helpBtn" title="Open platform guide">Help</button>
         <button class="btn secondary" id="workflowBtn" title="Start guided workflow">Workflow</button>
-        <button class="btn secondary" id="compactBtn" title="Toggle compact mode">Compact</button>
-        <button class="btn secondary" id="contrastBtn" title="Toggle high contrast">Contrast</button>
-        <button class="btn secondary" id="aboutBtn" title="About this platform">About</button>
+        <details class="moreMenu" id="moreMenu">
+          <summary class="btn secondary" title="More options">☰ More</summary>
+          <div class="morePanel">
+            <button class="btn secondary" id="helpBtn" title="Open platform guide">Help</button>
+            <button class="btn secondary" id="caseStudiesBtn" title="Open practical case studies">Case Studies</button>
+            <button class="btn secondary" id="compactBtn" title="Toggle compact mode">Compact</button>
+            <button class="btn secondary" id="contrastBtn" title="Toggle high contrast">Contrast</button>
+            <button class="btn secondary" id="aboutBtn" title="About this platform">About</button>
+          </div>
+        </details>
       </div>
 
       <div class="bar">
-        <div class="toggle" title="Hunt Mode highlights techniques used by the selected document">
-          <input type="checkbox" id="hunt" checked />
-          <span>Hunt Mode</span>
-        </div>
-
-        <div class="toggle" title="Auto-check polls a small heartbeat every 60s. It does not auto-refresh the full dataset.">
-          <input type="checkbox" id="autoCheck" checked />
-          <span>Auto-check</span>
-        </div>
-
         <button class="btn secondary mobileOnly" id="docsBtn">Docs</button>
         <button class="btn secondary mobileOnly" id="actionsBtn">Actions</button>
         <button class="btn secondary mobileOnly" id="jumpBtn">Jump</button>
@@ -1461,21 +1554,21 @@
   <main class="main">
     <aside class="panel rightSidePanel" id="sidePanelRight">
       <div class="panelHd">
-        <div class="h">Operations Sidebar <span class="chip" id="sideMetaRight">â€”</span></div>
+        <div class="h">Incidents Sidebar <span class="chip" id="sideMetaRight">â€”</span></div>
         <div class="panelTools">
-          <div class="meta"><span class="chip">Priorities + Documents</span></div>
+          <div class="meta"><span class="chip">Priorities + Incidents</span></div>
         </div>
       </div>
 
       <div class="rightSideBody" id="sideBodyRight">
         <div class="box prioPanel" id="prioBox">
-          <h3>Operational Priorities <span class="chip" id="prioChip">â€”</span></h3>
+          <h3>Prioritized incidents <span class="chip" id="prioChip">â€”</span></h3>
           <div class="docList" id="prioList"></div>
           <div class="muted" id="prioEmpty" style="display:none; margin-top:8px;">No priorities for current filters.</div>
         </div>
 
         <div class="box docsPanel" id="docsBox">
-          <h3>Documents <span class="chip" id="docCount">â€”</span></h3>
+          <h3>Incidents <span class="chip" id="docCount">â€”</span></h3>
           <div class="docList" id="docList"></div>
           <div class="muted" id="emptyDocs" style="display:none; margin-top:8px;">No documents match the current filters.</div>
         </div>
@@ -1488,6 +1581,8 @@
         <div class="panelTools">
           <div class="meta" id="selMeta">Loadingâ€¦</div>
           <div class="navActions">
+            <button class="btn secondary sm" id="toggleRightSidebarBtnMain" title="Show or hide Incidents Sidebar">Hide Incidents</button>
+            <button class="btn danger" id="toggleCardsBtn" title="Show/Hide top documents for all technique cards">Expand cards</button>
             <button class="btn secondary beacon" id="pathBtn" disabled title="Critical: open attack path and hunt pack workflow">Attack Path</button>
             <button class="btn secondary" id="hidePathBtn" style="visibility:hidden;" title="Hide current attack path">Hide Path</button>
             <span class="badge" id="newBadge" style="visibility:hidden;">
@@ -1505,6 +1600,7 @@
           <div class="hd">Navigator Minimap â€¢ click tactic to jump</div>
           <div class="matrixNavTrack" id="matrixNavTrack"></div>
         </div>
+        <div class="matrixDocContext" id="matrixDocContext" style="display:none;"></div>
         <div id="pathStripHost"></div>
         <div class="tacticGrid" id="matrix" aria-label="Incident technique flow map"></div>
         <div class="muted" id="emptyMatrix" style="display:none; padding:10px 2px;">
@@ -1593,17 +1689,7 @@
     </div>
   </nav>
 
-  <nav class="miniMap secondary" id="miniMapRight" aria-label="Operations minimap">
-    <div class="miniMapHd">
-      <span>MINIMAP</span>
-      <small>Operations</small>
-    </div>
-    <div class="miniTrack" id="miniTrackRight">
-      <button class="miniRow" data-target="matrixPanel" data-tone="matrix">Navigator <small>center</small></button>
-      <button class="miniRow" data-target="prioBox" data-tone="priority">Priorities <small>right</small></button>
-      <button class="miniRow" data-target="docsBox" data-tone="docs">Documents <small>right</small></button>
-    </div>
-  </nav>
+  
 </div>
 
 <!-- DOC MODAL -->
@@ -1658,7 +1744,7 @@
         Choose the reporting window that fits your investigation.<br/><br/>
 
         <b>Step 3: Review the Navigator</b><br/>
-        Technique cards are arranged by ATT&CK tactic and prioritized visually (Red=Rank 1, Yellow=Rank 2, Blue=Rank 3).<br/><br/>
+        Technique cards are arranged by ATT&CK tactic and prioritized visually (Red=Rank 1, Yellow=Rank 2, Blue=Rank 3). Use <b>Expand/Collapse cards</b> to show or hide <b>Top documents</b> for all technique cards at once.<br/><br/>
 
         <b>Step 4: Select an incident report</b><br/>
         Selecting a report highlights the ATT&CK technique flow for that specific incident in the Navigator.<br/><br/>
@@ -1679,6 +1765,19 @@
         MITRE ATT&CKÂ® is a registered trademark of The MITRE Corporation.
         This project is not affiliated with or endorsed by MITRE.
       </div>
+    </div>
+  </div>
+</dialog>
+
+
+<dialog id="caseStudiesModal">
+  <div class="modal caseModal">
+    <div class="modalHd">
+      <div class="h">Practical Case Studies <span class="chip">Operational Value</span></div>
+      <button class="x" id="closeCaseStudies">×</button>
+    </div>
+    <div class="modalBd" id="caseStudiesBody">
+      <div class="muted">Loading case studies…</div>
     </div>
   </div>
 </dialog>
@@ -1758,7 +1857,7 @@
 <div class="tourArrow" id="tourArrow">➜</div>
 <button class="btn danger tourDismiss" id="tourDismiss">Exit walkthrough</button>
 <div class="tourCard" id="tourCard">
-  <div class="tourStep" id="tourStep">Step 1/3</div>
+  <div class="tourStep" id="tourStep">Step 1/2</div>
   <h4 id="tourTitle">Guided Setup</h4>
   <p id="tourDesc"></p>
   <label class="tourPref"><input type="checkbox" id="tourAutoStart" checked /> Auto-show workflow on page load</label>
@@ -1768,6 +1867,66 @@
     <button class="btn" id="tourNext">Next</button>
   </div>
 </div>
+
+<dialog id="introMessageModal">
+  <div class="modal" style="max-width:820px; border-color: rgba(255,214,97,.30); background: linear-gradient(180deg, rgba(8,22,34,.98), rgba(7,18,28,.98));">
+    <div class="modalHd" style="border-bottom-color: rgba(255,214,97,.20);">
+      <div class="h">Welcome to the Living Threat Repository</div>
+    </div>
+    <div class="modalBd" style="line-height:1.6; font-size:13px; color:rgba(232,245,255,.94);">
+      <div style="padding:12px; border:1px solid rgba(255,214,97,.24); border-radius:14px; background:linear-gradient(180deg, rgba(255,214,97,.10), rgba(255,214,97,.03)); margin-bottom:12px;">
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:.8px; color:rgba(255,227,146,.92); margin-bottom:6px; font-weight:800;">Why this exists</div>
+        <div style="font-size:16px; line-height:1.35; font-weight:800; color:#fff4d2;">Cybersecurity produces an enormous amount of intelligence every week.</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(5, minmax(90px,1fr)); gap:8px; margin-bottom:12px;">
+        <span class="chip" style="justify-content:center; border-color:rgba(0,245,255,.24);">Reports</span>
+        <span class="chip" style="justify-content:center; border-color:rgba(0,245,255,.24);">Threat advisories</span>
+        <span class="chip" style="justify-content:center; border-color:rgba(0,245,255,.24);">Incident write-ups</span>
+        <span class="chip" style="justify-content:center; border-color:rgba(0,245,255,.24);">Vendor research</span>
+        <span class="chip" style="justify-content:center; border-color:rgba(0,245,255,.24);">Blog posts</span>
+      </div>
+
+      <p><b>But there is a fundamental problem.</b></p>
+      <p>Most of this intelligence is static.</p>
+      <p>Once published, it disappears into PDFs, bookmarks, and feeds. Security teams may read it once, extract a few indicators, and move on.</p>
+      <p>Yet the real purpose of threat intelligence is not simply to inform — it is to improve defensive decisions.</p>
+      <p>This is why we built something different.</p>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:8px 0 12px; padding:10px; border:1px solid rgba(0,245,255,.20); border-radius:12px; background:rgba(0,245,255,.06);">
+        <b style="color:rgba(213,248,255,.96);">Living Threat Repository website:</b>
+        <a href="https://thelivingthreat.rabitanoor.com" target="_blank" rel="noopener noreferrer" style="font-family:var(--mono);">🔗 https://thelivingthreat.rabitanoor.com</a>
+      </div>
+
+      <p><b>The idea is simple:</b></p>
+      <p>Instead of treating threat intelligence as static documents, the platform treats intelligence as a living structure that can be explored, mapped, and connected.</p>
+      <p>The repository maps real-world incidents to attacker behavior, allowing security professionals to:</p>
+      <ul style="margin:8px 0 12px 16px; padding:0; display:grid; gap:6px;">
+        <li>Explore how attacks unfold across the MITRE ATT&amp;CK tactics</li>
+        <li>Understand real incidents behind each technique</li>
+        <li>Study attacker behavior instead of isolated indicators</li>
+        <li>Bridge threat intelligence with security operations</li>
+      </ul>
+      <p>The goal is to make threat intelligence operational, not archival.</p>
+      <p>Think of it as a living knowledge base of real attacks, designed to help analysts, engineers, and defenders understand how threats actually work.</p>
+
+      <div style="margin-top:10px; padding:10px; border:1px dashed rgba(255,214,97,.28); border-radius:12px; background:rgba(255,214,97,.05);">
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:rgba(255,227,146,.86); margin-bottom:6px;">Relevant for teams in</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="chip">SOC operations</span>
+          <span class="chip">Threat hunting</span>
+          <span class="chip">Detection engineering</span>
+          <span class="chip">Security architecture</span>
+          <span class="chip">Cyber threat intelligence</span>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+        <button class="btn" id="introContinueBtn">Continue to workflow</button>
+      </div>
+    </div>
+  </div>
+</dialog>
 
 <dialog id="actionsModal">
   <div class="modal">
@@ -1793,6 +1952,7 @@
 /* =========================================================
    DATA
    ========================================================= */
+const CASE_STUDIES_SEED = {{ (case_studies_seed or {})|tojson }};
 let DOCS = [];
 let TECH = {};
 let TACTIC_ORDER = [];
@@ -1838,6 +1998,7 @@ const state = {
   autoCheck: true,
   newCount: 0,
   pathSummaryCollapsed: false,
+  cardDocsExpanded: false,
 };
 
 const PREF_KEY_WORKFLOW_AUTO = "lmr.workflow.auto";
@@ -1854,6 +2015,22 @@ function applyVisualPrefs(){
   document.body.classList.toggle("compact", localStorage.getItem("lmr.compact") === "1");
   document.body.classList.toggle("highContrast", localStorage.getItem("lmr.contrast") === "1");
 }
+function isRightSidebarCollapsed(){
+  return localStorage.getItem("lmr.rightCollapsed") !== "0";
+}
+function applyRightSidebarState(){
+  const collapsed = isRightSidebarCollapsed();
+  document.body.classList.toggle("rightSidebarCollapsed", collapsed);
+  const b2 = $("toggleRightSidebarBtnMain");
+  if(b2) b2.textContent = collapsed ? "Show Incidents" : "Hide Incidents";
+}
+function setRightSidebarCollapsed(v){
+  localStorage.setItem("lmr.rightCollapsed", v ? "1" : "0");
+  applyRightSidebarState();
+}
+function toggleRightSidebar(){
+  setRightSidebarCollapsed(!isRightSidebarCollapsed());
+}
 
 const $ = (id)=>document.getElementById(id);
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
@@ -1863,18 +2040,13 @@ function asArray(x){ if(!x) return []; return Array.isArray(x) ? x : [x]; }
 const TOUR_STEPS = [
   {
     id: "aggBox",
-    title: "Step 1: Start with Aggregations",
-    desc: "Start with Aggregations to narrow scope before analysis. Example: set Severity=High+, Actor=LockBit, and Sector=Healthcare; or search 'ransomware + exfiltration'. You can also filter by Tool, Country, Breach Type, Software, and Access Vector."
-  },
-  {
-    id: "rangeFocus",
-    title: "Step 2: Set time range",
-    desc: "Set the reporting window for your objective. Example: use 7d for active triage, 30d for campaign monitoring, 90d+ for trend analysis, or All to review full historical context."
+    title: "Step 1: Use the full Aggregations panel",
+    desc: "Use the full Aggregations panel as one step: set time range and any relevant filters (Actor, Tool, Sector, Breach Type, Country, Software, Access Vector, and search) to scope your analysis."
   },
   {
     id: "matrixPanel",
-    title: "Step 3: Use the Navigator",
-    desc: "Review prioritized technique cards (Rank 1/2/3), open report lists from card icons, select an incident to highlight ATT&CK flow, then open Attack Path and Hunt Pack for kill-chain context and remediation guidance."
+    title: "Step 2: Review the Navigator pane",
+    desc: "Move to the Navigator pane to review prioritized technique cards, then click the top-right icon on a technique card to view mapped incidents. Use Expand/Collapse cards to show or hide Top documents for all technique cards at once. Select an incident to highlight the ATT&CK flow, then open Attack Path and Hunt Pack for deeper operational context."
   }
 ];
 
@@ -1905,8 +2077,7 @@ function isTopFilterCompleted(){
   return state.sevMin !== "ALL" || state.allTime || state.rangeDays !== 7;
 }
 function canAdvanceTourStep(){
-  if(tourIdx === 0) return isAggregationCompleted();
-  if(tourIdx === 1) return isTopFilterCompleted();
+  if(tourIdx === 0) return isAggregationCompleted() || isTopFilterCompleted();
   return true;
 }
 function endTour(){
@@ -1964,7 +2135,7 @@ function renderTour(){
 function startTour(){ tourActive = true; tourIdx = 0; renderTour(); }
 function nextTour(){
   if(!canAdvanceTourStep()){
-    toast(tourIdx === 0 ? "Apply at least one Aggregations filter to continue" : "Adjust range or severity to continue");
+    toast("Adjust Aggregations (time range or filters) to continue");
     return;
   }
   if(tourIdx >= TOUR_STEPS.length - 1) endTour();
@@ -2330,12 +2501,16 @@ function techniqueMetaForCard(docs, tid){
   };
 }
 
-function toggleDocSelection(docId){
+function toggleDocSelection(docId, options={}){
+  const { renderNow = true } = options;
   const wasSelected = (state.selectedDocId===docId);
   state.selectedDocId = wasSelected ? null : docId;
+  if(state.cardDocsExpanded) state.cardDocsExpanded = false;
   if(!state.selectedDocId) state.pathOn = false;
-  syncHash();
-  render();
+  if(renderNow){
+    syncHash();
+    render();
+  }
 }
 
 function pickTopN(mapObj, n=5){
@@ -2386,11 +2561,28 @@ function sevPill(sev){
 let loaderTimer = null;
 let loaderPct = 0;
 const LOADER_GUIDE_PARAGRAPHS = [
-  "This platform continuously converts real-world threat reporting into ATT&CK-mapped evidence so security teams can move from news to action quickly.",
-  "Use cases: triage emerging campaigns, prioritize high-impact incidents by severity and recency, and brief SOC/IR stakeholders with a shared operational view.",
-  "Analyst workflow: filter by environment-relevant facets, select a document, validate the attack path, then expand Hunt Pack for detections, remediation, and pivot points.",
-  "Operational value: maintain awareness of the changing cyber landscape, reduce blind spots across actors/tools/sectors, and accelerate detection engineering updates."
+  "A living threat repository where real-world incidents are continuously mapped to ATT&CK tactics and techniques, in a Navigator-style view. Filter the data, open a report, highlight its technique chain, and move into Attack Path and Hunt Pack for deeper operational context."
 ];
+
+function showIntroMessageGate(){
+  const modal = $("introMessageModal");
+  const btn = $("introContinueBtn");
+  if(!modal || !btn) return Promise.resolve();
+  return new Promise((resolve)=>{
+    const done = ()=>{
+      btn.removeEventListener("click", done);
+      modal.removeEventListener("close", done);
+      modal.removeEventListener("cancel", onCancel);
+      if(modal.open) modal.close();
+      resolve();
+    };
+    const onCancel = (e)=>{ e.preventDefault(); };
+    btn.addEventListener("click", done);
+    modal.addEventListener("close", done);
+    modal.addEventListener("cancel", onCancel);
+    modal.showModal();
+  });
+}
 
 function showLoader(title="Loading", msg="Startingâ€¦"){
   $("loaderTitle").textContent = title;
@@ -2563,8 +2755,16 @@ async function bootstrapFromServer({reason="Load"} = {}){
   setLoaderPct(85);
   setLoaderMsg("Renderingâ€¦");
 
-  loadHash();
-  render();
+  try{
+    loadHash();
+    render();
+  }catch(e){
+    console.error("Render failure during bootstrap", e);
+    setLoaderPct(100);
+    setLoaderMsg("Render failed. Reload the page.");
+    setTimeout(hideLoader, 900);
+    return false;
+  }
 
   setLoaderPct(100);
   setLoaderMsg("Done.");
@@ -2773,6 +2973,7 @@ function render(){
 
   $("pathBtn").disabled = !selDocNow;
   $("hidePathBtn").style.visibility = state.pathOn ? "visible" : "hidden";
+  $("toggleCardsBtn").textContent = state.cardDocsExpanded ? "Collapse cards" : "Expand cards";
   $("selMeta").textContent = selDocNow ? `Doc: ${selDocNow.Title} (${fmtDate(selDocNow.Timestamp)})` : "No doc selected";
 
   buildSideFilters(docs);
@@ -2781,6 +2982,7 @@ function render(){
   renderOperationalPriorities(docs);
   renderTechniqueFocus(docs, techStats);
   renderPathStrip(selDocNow);
+  renderMatrixDocContext(selDocNow);
   renderMatrix(docs, techStats, selDocNow);
 
   renderDocList(docs, $("docList"), $("emptyDocs"), $("docCount"));
@@ -2881,14 +3083,35 @@ function renderOperationalPriorities(docs){
       </div>
     `;
     item.addEventListener("click", ()=>{
-      state.selectedDocId = d.id;
+      toggleDocSelection(d.id, { renderNow:false });
       state.huntOn = true;
-      $("hunt").checked = true;
       syncHash();
       render();
     });
     host.appendChild(item);
   }
+}
+
+function renderMatrixDocContext(selDoc){
+  const host = $("matrixDocContext");
+  if(!host) return;
+  if(!selDoc){
+    host.style.display = "none";
+    host.innerHTML = "";
+    return;
+  }
+
+  const chain = String(selDoc.kill_chain_summary || "").trim();
+  host.style.display = "block";
+  host.innerHTML = `
+    <div class="title">Selected incident: ${escapeHtml(selDoc.Title || "â€”")}</div>
+    <div class="summary">${escapeHtml(chain || shortTitle(selDoc.doc_summary || "No kill-chain summary available for this document.", 420))}</div>
+    <div class="meta">
+      <span class="chip">${escapeHtml(selDoc.id || "â€”")}</span>
+      <span class="chip">${fmtDate(selDoc.Timestamp)}</span>
+      <span class="chip">Tech ${(selDoc.Techniques||[]).length}</span>
+    </div>
+  `;
 }
 
 /* Selected doc box */
@@ -2936,7 +3159,7 @@ function renderSelectedDocBox(selDoc){
   $("sdOpen").addEventListener("click", ()=> openDocModal(selDoc));
   $("sdTogglePath").addEventListener("click", ()=>{
     state.pathOn = !state.pathOn;
-    if(state.pathOn) state.packOn = false;
+    if(state.pathOn){ state.packOn = false; state.pathPinned = true; }
     syncHash();
     render();
   });
@@ -3019,13 +3242,7 @@ function renderDocList(docs, hostEl, emptyEl, countChipEl){
       </div>
     `;
     item.addEventListener("click", ()=>{
-      const wasSelected = (state.selectedDocId===d.id);
-      state.selectedDocId = wasSelected ? null : d.id;
-      if(!state.selectedDocId){
-        state.pathOn = false;
-      }
-      syncHash();
-      render();
+      toggleDocSelection(d.id);
     });
     hostEl.appendChild(item);
   }
@@ -3110,7 +3327,8 @@ function renderPathStrip(selDoc){
   }
 
   const strip = document.createElement("div");
-  strip.className = `pathStrip hotPanel ${state.pathPinned ? "pinned" : ""}`.trim();
+  state.pathPinned = true;
+  strip.className = "pathStrip hotPanel pinned";
   strip.innerHTML = `
     <div class="row">
       <div class="title">
@@ -3122,7 +3340,6 @@ function renderPathStrip(selDoc){
         <span class="chip">tech ${(selDoc.Techniques||[]).length}</span>
         <button class="btn secondary sm" id="openDocFromPath">Open Doc</button>
         <button class="btn secondary sm" id="togglePathSummary">${state.pathSummaryCollapsed ? "Expand" : "Summary"}</button>
-        <button class="btn secondary sm" id="togglePin">${state.pathPinned ? "Unpin" : "Pin"} Attack Path</button>
         <button class="btn sm" id="togglePack">${state.packOn ? "Hide" : "Show"} Hunt Pack</button>
         <button class="btn danger sm" id="closePathInStrip">Close Attack Path</button>
       </div>
@@ -3226,11 +3443,6 @@ function renderPathStrip(selDoc){
   strip.querySelector("#openDocFromPath").addEventListener("click", ()=> openDocModal(selDoc));
   strip.querySelector("#togglePathSummary").addEventListener("click", ()=>{
     state.pathSummaryCollapsed = !state.pathSummaryCollapsed;
-    render();
-  });
-  strip.querySelector("#togglePin").addEventListener("click", ()=>{
-    state.pathPinned = !state.pathPinned;
-    syncHash();
     render();
   });
   strip.querySelector("#togglePack").addEventListener("click", ()=>{
@@ -3510,7 +3722,10 @@ function renderMatrix(docs, techStats, selDoc){
       }
 
       const isDocHit = !!(selDoc && state.huntOn && (selDoc.Techniques||[]).includes(t.tid));
-      if(isDocHit) card.classList.add("docHit");
+      if(isDocHit){
+        card.classList.add("docHit");
+        card.style.background = "linear-gradient(180deg, rgba(35,207,199,.48), rgba(35,207,199,.24), rgba(7,26,34,.40))";
+      }
 
       const isPathHit = !!(selDoc && state.pathOn && stageFor[t.tid]);
       if(isPathHit){
@@ -3521,16 +3736,16 @@ function renderMatrix(docs, techStats, selDoc){
       if(selDoc && state.huntOn && !isDocHit) card.classList.add("dim");
       if(selDoc && state.pathOn && !isPathHit) card.classList.add("dim");
 
-      const nextTid = incidentFlow.nextByTid[t.tid] || null;
       const prevTid = incidentFlow.prevByTid[t.tid] || null;
       if(prevTid) card.classList.add("flowTarget");
-      const nextTactic = nextTid ? (TECH[nextTid]?.tactic || "Other") : null;
-      const nextIsSameTactic = !!(nextTid && nextTactic === t.tactic);
-      const flowJumpText = (nextTid && !nextIsSameTactic)
-        ? `→ ${nextTid} • ${nextTactic}`
-        : "";
 
       const techMeta = techniqueMetaForCard(t.docs, t.tid);
+      const seq = Array.isArray(incidentFlow.ordered) ? incidentFlow.ordered : [];
+      const seqCount = seq.length;
+      let seqIdx = -1;
+      if(seqCount){
+        seqIdx = seq.indexOf(t.tid);
+      }
 
       const rank = recommendedRank.get(t.tid) || null;
       const rankBadge = rank ? `<span class="rankBadge ${rank===1?"r1":rank===2?"r2":"r3"}">R${rank}</span>` : "";
@@ -3544,8 +3759,8 @@ function renderMatrix(docs, techStats, selDoc){
         </div>
         <div style="font-weight:900; font-size:12px; line-height:1.25; margin-bottom:4px;">${escapeHtml(techMeta.technique_name)}</div>
         <div style="font-size:11px; line-height:1.25; color:rgba(210,222,255,.86);">${escapeHtml(shortTitle(techMeta.technique_description, 160))}</div>
-        ${flowJumpText ? `<div class="flowJump" title="Incident flow continues to ${escapeHtml(nextTid)} in ${escapeHtml(nextTactic)}">${escapeHtml(flowJumpText)}</div>` : ""}
-        <div class="cardDocMenu" data-doc-menu style="display:none;">
+        ${seqIdx >= 0 ? `<div class="flowSeqBadge glow" style="--flowDelay:${seqIdx}; --flowCount:${seqCount};" title="Flow step ${seqIdx+1}">${seqIdx+1}</div>` : ""}
+        <div class="cardDocMenu" data-doc-menu style="display:${state.cardDocsExpanded ? "flex" : "none"};">
           ${topDocs.length
             ? topDocs.map(d=>`<button class="cardDocItem" type="button" data-doc-id="${escapeHtml(d.id)}" title="${escapeHtml(d.Title)}">${escapeHtml(shortTitle(d.Title, 80))}</button>`).join("")
             : `<div class="muted" style="font-size:11px; padding:4px;">No related documents.</div>`}
@@ -3590,14 +3805,14 @@ function renderMatrix(docs, techStats, selDoc){
       return `<button class="${cls}" data-tac="${escapeHtml(tac)}">${escapeHtml(shortTitle(tac, 16))} (${cnt})</button>`;
     }).join("");
     nav.querySelectorAll("[data-tac]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const el = $(tacticDomId(btn.getAttribute("data-tac")));
-        if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+      btn.addEventListener("click", (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        scrollMatrixToTactic(btn.getAttribute("data-tac"));
       });
     });
   }
 
-  requestAnimationFrame(()=>renderIncidentFlowOverlay(host, incidentFlow));
   $("emptyMatrix").style.display = rendered ? "none" : "block";
 }
 
@@ -3651,18 +3866,17 @@ function openDocModal(doc){
   });
 
   $("selectDocForHunt").addEventListener("click", ()=>{
-    state.selectedDocId = doc.id;
+    toggleDocSelection(doc.id, { renderNow:false });
     state.huntOn = true;
-    $("hunt").checked = true;
     syncHash();
     render();
     $("docModal").close();
   });
 
   $("togglePathFromModal").addEventListener("click", ()=>{
-    state.selectedDocId = doc.id;
+    if(state.selectedDocId!==doc.id) toggleDocSelection(doc.id, { renderNow:false });
     state.pathOn = !state.pathOn;
-    if(state.pathOn) state.packOn = false;
+    if(state.pathOn){ state.packOn = false; state.pathPinned = true; }
     syncHash();
     render();
     $("docModal").close();
@@ -3744,9 +3958,8 @@ function renderSwitcher(){
       <div class="swSnip">${escapeHtml(shortTitle(d.doc_summary || "", 170))}</div>
     `;
     el.addEventListener("click", ()=>{
-      state.selectedDocId = d.id;
+      toggleDocSelection(d.id, { renderNow:false });
       state.huntOn = true;
-      $("hunt").checked = true;
       syncHash();
       render();
       $("switcherModal").close();
@@ -3787,6 +4000,85 @@ $("shareBtn").addEventListener("click", async ()=>{
 $("helpBtn").addEventListener("click", ()=> $("helpModal").showModal());
 $("workflowBtn").addEventListener("click", ()=> startTour());
 $("aboutBtn").addEventListener("click", ()=> $("aboutModal").showModal());
+
+let caseStudiesCache = null;
+async function fetchCaseStudiesPayload(){
+  if(CASE_STUDIES_SEED && Array.isArray(CASE_STUDIES_SEED.cases) && CASE_STUDIES_SEED.cases.length){
+    return CASE_STUDIES_SEED;
+  }
+  const candidates = [
+    new URL("api/case_studies", window.location.href).toString(),
+    "/api/case_studies",
+    new URL("static/case_studies.json", window.location.href).toString(),
+    "/static/case_studies.json",
+  ];
+  const tried = [];
+  for(const url of candidates){
+    try{
+      const r = await fetch(url, {cache:"no-store"});
+      tried.push(`${url} => ${r.status}`);
+      if(!r.ok) continue;
+      return await r.json();
+    }catch(e){
+      tried.push(`${url} => network_error`);
+    }
+  }
+  throw new Error(`Failed to load case studies. Tried: ${tried.join(" | ")}`);
+}
+function renderCaseStudies(data){
+  const host = $("caseStudiesBody");
+  if(!host) return;
+  const intro = escapeHtml(data?.intro || "");
+  const title = escapeHtml(data?.title || "Practical Case Studies");
+  const domains = (Array.isArray(data?.domains) ? data.domains : []).map(x=>`<span class="chip">${escapeHtml(x)}</span>`).join(" ");
+  const cases = Array.isArray(data?.cases) ? data.cases : [];
+  const deeper = Array.isArray(data?.deeper_value) ? data.deeper_value : [];
+
+  host.innerHTML = `
+    <div class="caseHero">
+      <div style="font-size:12px; text-transform:uppercase; letter-spacing:.8px; color:rgba(255,227,146,.90); margin-bottom:6px; font-weight:800;">Why this matters</div>
+      <div style="font-size:16px; font-weight:900; line-height:1.3; color:#fff4d2;">${title}</div>
+      <p style="margin:8px 0 10px;">${intro}</p>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">${domains}</div>
+    </div>
+    <div class="caseGrid">
+      ${cases.map(c=>`
+        <details class="caseCard" ${Number(c.id)===1 ? "open" : ""}>
+          <summary><span class="caseNum">${escapeHtml(String(c.id||"•"))}</span> ${escapeHtml(c.title||"Case")}</summary>
+          <div class="caseBody">
+            <p><b>Challenge:</b> ${escapeHtml(c.challenge||"")}</p>
+            <p><b>How the platform is used:</b> ${escapeHtml(c.how_used||"")}</p>
+            <p><b>What changes:</b> ${escapeHtml(c.what_changes||"")}</p>
+            <p><b>Outcome:</b> ${escapeHtml(c.outcome||"")}</p>
+            <p><b>Why this is valuable:</b> ${escapeHtml(c.value||"")}</p>
+          </div>
+        </details>
+      `).join("")}
+    </div>
+    <div class="caseHero" style="margin-top:12px;">
+      <div style="font-size:12px; text-transform:uppercase; letter-spacing:.8px; color:rgba(255,227,146,.90); margin-bottom:6px; font-weight:800;">The deeper value across all case studies</div>
+      <ol style="margin:0; padding-left:18px; display:grid; gap:6px;">${deeper.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ol>
+    </div>
+  `;
+}
+async function openCaseStudies(){
+  const modal = $("caseStudiesModal");
+  const host = $("caseStudiesBody");
+  if(!modal || !host) return;
+  if(!caseStudiesCache){
+    host.innerHTML = `<div class="muted">Loading case studies…</div>`;
+    try{
+      caseStudiesCache = await fetchCaseStudiesPayload();
+      renderCaseStudies(caseStudiesCache);
+    }catch(e){
+      host.innerHTML = `<div class="blockquote"><b>Unable to load case studies.</b><br/><span class="muted">${escapeHtml(String(e?.message || e))}</span></div>`;
+    }
+  }else{
+    renderCaseStudies(caseStudiesCache);
+  }
+  modal.showModal();
+}
+$("caseStudiesBtn").addEventListener("click", openCaseStudies);
 $("compactBtn").addEventListener("click", ()=>{
   const next = !(localStorage.getItem("lmr.compact") === "1");
   localStorage.setItem("lmr.compact", next ? "1" : "0");
@@ -3799,6 +4091,17 @@ $("contrastBtn").addEventListener("click", ()=>{
 });
 $("closeHelp").addEventListener("click", ()=> $("helpModal").close());
 $("closeAbout").addEventListener("click", ()=> $("aboutModal").close());
+$("closeCaseStudies").addEventListener("click", ()=> $("caseStudiesModal").close());
+
+function closeMoreMenu(){
+  const m = $("moreMenu");
+  if(m && m.open) m.open = false;
+}
+document.addEventListener("click", (e)=>{
+  const m = $("moreMenu");
+  if(!m || !m.open) return;
+  if(!e.target.closest("#moreMenu")) closeMoreMenu();
+});
 
 function openActionsModal(){
   const host = $("actionsBody");
@@ -3807,6 +4110,7 @@ function openActionsModal(){
       <button class="btn secondary" data-act="share">Share</button>
       <button class="btn secondary" data-act="refresh">Refresh</button>
       <button class="btn secondary" data-act="help">Help</button>
+      <button class="btn secondary" data-act="cases">Case Studies</button>
       <button class="btn secondary" data-act="workflow">Workflow</button>
       <button class="btn secondary" data-act="about">About</button>
     </div>
@@ -3816,8 +4120,10 @@ function openActionsModal(){
     if(a==="share") $("shareBtn").click();
     if(a==="refresh") $("refreshBtn").click();
     if(a==="help") $("helpBtn").click();
+    if(a==="cases") $("caseStudiesBtn").click();
     if(a==="workflow") $("workflowBtn").click();
     if(a==="about") $("aboutBtn").click();
+    closeMoreMenu();
     $("actionsModal").close();
   }));
   $("actionsModal").showModal();
@@ -3843,6 +4149,8 @@ $("jumpBtn").addEventListener("click", openJumpModal);
 $("closeActions").addEventListener("click", ()=> $("actionsModal").close());
 $("closeJump").addEventListener("click", ()=> $("jumpModal").close());
 
+$("toggleRightSidebarBtnMain").addEventListener("click", toggleRightSidebar);
+
 /* Wiring */
 $("sev").addEventListener("change", ()=>{ state.sevMin = $("sev").value; syncHash(); render(); if(tourActive) renderTour(); });
 $("q").addEventListener("input", ()=>{ state.q = $("q").value; syncHash(); render(); if(tourActive) renderTour(); });
@@ -3855,16 +4163,15 @@ $("sectorF").addEventListener("change", ()=>{ state.sector = $("sectorF").value;
 $("softwareF").addEventListener("change", ()=>{ state.software = $("softwareF").value; syncHash(); render(); if(tourActive) renderTour(); });
 $("accessVectorF").addEventListener("change", ()=>{ state.accessVector = $("accessVectorF").value; syncHash(); render(); if(tourActive) renderTour(); });
 
-$("hunt").addEventListener("change", ()=>{
-  state.huntOn = $("hunt").checked;
-  if(!state.huntOn) state.pathOn = false;
-  syncHash(); render();
+$("toggleCardsBtn").addEventListener("click", ()=>{
+  state.cardDocsExpanded = !state.cardDocsExpanded;
+  render();
 });
 
 $("pathBtn").addEventListener("click", ()=>{
   if($("pathBtn").disabled) return;
   state.pathOn = true;
-  if(state.pathOn) state.packOn = false;
+  if(state.pathOn){ state.packOn = false; state.pathPinned = true; }
   if(tourActive && TOUR_STEPS[tourIdx]?.id === "matrixPanel" && state.pathOn) endTour();
   syncHash(); render();
 });
@@ -3884,12 +4191,6 @@ $("newBadge").addEventListener("click", async ()=>{
   toast("Refreshed");
 });
 
-$("autoCheck").addEventListener("change", ()=>{
-  state.autoCheck = $("autoCheck").checked;
-  toast(state.autoCheck ? "Auto-check enabled" : "Auto-check disabled");
-  if(state.autoCheck) startHeartbeat(); else stopHeartbeat();
-});
-
 $("clearAll").addEventListener("click", ()=>{
   location.hash = "";
   Object.assign(state, {
@@ -3901,14 +4202,14 @@ $("clearAll").addEventListener("click", ()=>{
     pathPinned:true,
     packOn:false,
     sideTab:"focus",
-    autoCheck: $("autoCheck").checked,
+    autoCheck: true,
     newCount: 0,
+    cardDocsExpanded: false,
   });
   $("range").value = "7";
   $("rangeV").textContent = "7d";
   $("sev").value = "ALL";
   $("q").value = "";
-  $("hunt").checked = true;
   setPresetActive("7");
   setNewDocs(0);
   syncHash();
@@ -3970,11 +4271,12 @@ document.addEventListener("keydown", (e)=>{
   if(!typing && e.key.toLowerCase() === "p"){
     e.preventDefault();
     if(e.shiftKey){
-      state.pathPinned = !state.pathPinned;
+      state.pathPinned = true;
+      toast("Attack Path remains fixed at top");
       syncHash(); render();
     }else if(state.selectedDocId){
       state.pathOn = !state.pathOn;
-      if(state.pathOn) state.packOn = false;
+      if(state.pathOn){ state.packOn = false; state.pathPinned = true; }
       syncHash(); render();
     }
   }
@@ -3989,6 +4291,8 @@ document.addEventListener("keydown", (e)=>{
     if($("docModal").open) $("docModal").close();
     if($("helpModal").open) $("helpModal").close();
     if($("aboutModal").open) $("aboutModal").close();
+    if($("caseStudiesModal").open) $("caseStudiesModal").close();
+    closeMoreMenu();
     if($("switcherModal").open) $("switcherModal").close();
     closeDrawer();
     if(tourActive) endTour();
@@ -4008,7 +4312,7 @@ function syncHash(){
   p.set("sec", state.sector);
   p.set("sw", state.software);
   p.set("av", state.accessVector);
-  p.set("hunt", state.huntOn ? "1" : "0");
+  p.set("hunt", "1");
   p.set("path", state.pathOn ? "1" : "0");
   p.set("pathpin", state.pathPinned ? "1" : "0");
   p.set("pack", state.packOn ? "1" : "0");
@@ -4030,9 +4334,10 @@ function loadHash(){
   state.sector = p.get("sec") || "ALL";
   state.software = p.get("sw") || "ALL";
   state.accessVector = p.get("av") || "ALL";
-  state.huntOn = (p.get("hunt") || "1") === "1";
+  state.huntOn = true;
   state.pathOn = (p.get("path") || "0") === "1";
   state.pathPinned = (p.get("pathpin") || "1") === "1";
+  if(state.pathOn) state.pathPinned = true;
   state.packOn = (p.get("pack") || "0") === "1";
   state.selectedDocId = p.get("doc");
   state.selectedTechId = p.get("tech");
@@ -4042,7 +4347,6 @@ function loadHash(){
 
   $("sev").value = state.sevMin;
   $("q").value = state.q;
-  $("hunt").checked = state.huntOn;
 
   if(state.allTime){
     $("rangeV").textContent = "ALL";
@@ -4055,6 +4359,16 @@ function loadHash(){
 }
 window.addEventListener("hashchange", ()=>{ loadHash(); render(); });
 window.addEventListener("resize", ()=>{ if(state.pathOn || (state.huntOn && state.selectedDocId)) render(); });
+
+function scrollMatrixToTactic(tacticName){
+  const matrixBody = $("matrixPanel")?.querySelector(".matrixBody");
+  const target = $(tacticDomId(tacticName));
+  if(!matrixBody || !target) return;
+  const bodyRect = matrixBody.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const desiredTop = Math.max(0, matrixBody.scrollTop + (targetRect.top - bodyRect.top) - 14);
+  matrixBody.scrollTo({ top: desiredTop, behavior: "smooth" });
+}
 
 /* Minimap */
 function scrollMiniTarget(targetId){
@@ -4096,7 +4410,6 @@ function setMiniActiveByScroll(){
   };
 
   setActive("miniTrack", "sideBody", ["aggBox","focusBox"]);
-  setActive("miniTrackRight", "sideBodyRight", ["prioBox","docsBox"]);
 }
 
 $("miniTrack").addEventListener("click", (e)=>{
@@ -4104,23 +4417,22 @@ $("miniTrack").addEventListener("click", (e)=>{
   if(!btn) return;
   scrollMiniTarget(btn.getAttribute("data-target"));
 });
-$("miniTrackRight").addEventListener("click", (e)=>{
-  const btn = e.target.closest(".miniRow");
-  if(!btn) return;
-  scrollMiniTarget(btn.getAttribute("data-target"));
-});
 $("sideBody").addEventListener("scroll", setMiniActiveByScroll, {passive:true});
-$("sideBodyRight").addEventListener("scroll", setMiniActiveByScroll, {passive:true});
 setMiniActiveByScroll();
 
 /* Init */
 (async function init(){
   applyVisualPrefs();
+  applyRightSidebarState();
   state.sideTab = "focus";
   syncSidebarTabs();
-  await bootstrapFromServer({reason:"Loading"});
-  if(getWorkflowAutoStart()) startTour();
-  if(state.autoCheck) startHeartbeat();
+  const ok = await bootstrapFromServer({reason:"Loading"});
+  if(ok){
+    await showIntroMessageGate();
+    if(getWorkflowAutoStart()) startTour();
+  }
+  state.autoCheck = true;
+  startHeartbeat();
 })();
 </script>
 </body>

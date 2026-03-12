@@ -694,12 +694,145 @@ def build_catalog_for_docs(docs: List[Dict[str, Any]], name_hints: Dict[str, str
     return {"tactic_order": order, "techniques": techniques}
 
 
+def _default_case_studies_payload() -> Dict[str, Any]:
+    return {'title': 'Practical Case Studies: The Value of the Living MITRE Repository',
+     'intro': 'The Living MITRE Repository is not just a place to display threat reports. Its value '
+              'comes from turning static intelligence into something teams can actually use across '
+              'hunting, detection, response, architecture, leadership, and training.',
+     'domains': ['Threat hunting',
+                 'Detection engineering',
+                 'Incident response',
+                 'CTI collaboration',
+                 'Security architecture',
+                 'Executive briefings',
+                 'Training',
+                 'Prioritization'],
+     'cases': [{'id': 1,
+                'title': 'SOC Threat Hunting',
+                'challenge': 'SOC analysts receive many external reports but have limited time to '
+                             'correlate behavior manually.',
+                'how_used': 'Filter by recent range, severity, malware/tools, software, and sector. '
+                            'Review recurring ATT&CK techniques, select an incident, then use Attack '
+                            'Path and Hunt Pack to investigate pivots.',
+                'what_changes': 'The platform pre-structures behavior correlation, replacing mental '
+                                'cross-referencing of separate reports.',
+                'outcome': 'Hunts are built around recurring attacker behavior rather than isolated '
+                           'indicators.',
+                'value': 'Shortens time from reading intelligence to active ATT&CK-based hunting.'},
+               {'id': 2,
+                'title': 'Detection Engineering Prioritization',
+                'challenge': 'Detection teams must choose what to build first from an overwhelming '
+                             'backlog.',
+                'how_used': 'Filter for credential theft, high-impact incidents, breach type, data '
+                            'risk, software, and access vectors. Use technique recurrence and mapped '
+                            'incidents to prioritize coverage.',
+                'what_changes': 'Rule development shifts from headline-driven to evidence-driven '
+                                'prioritization.',
+                'outcome': 'Detections are built for repeatedly observed techniques in relevant '
+                           'incidents.',
+                'value': 'Improves quality of coverage and gives defensible prioritization rationale.'},
+               {'id': 3,
+                'title': 'Incident Response Triage',
+                'challenge': 'Responders must quickly reason through partial alerts and incomplete '
+                             'logs under pressure.',
+                'how_used': 'Select a similar mapped incident, inspect highlighted technique chain, '
+                            'open Attack Path, then use Hunt Pack checks and pivots.',
+                'what_changes': 'Triage moves from loose alert lists to a structured behavioral model.',
+                'outcome': 'Faster sequencing of what happened first and what to investigate next.',
+                'value': 'Reduces triage friction and supports junior responder reasoning.'},
+               {'id': 4,
+                'title': 'CTI-to-Operations Collaboration',
+                'challenge': 'CTI reports are strong but hard to operationalize consistently across '
+                             'SOC, IR, and engineering.',
+                'how_used': 'Ingest write-ups into ATT&CK-mapped structure, then share filtered views '
+                            'with techniques, incidents, pivots, priorities, and attack path context.',
+                'what_changes': 'Teams operate from a shared behavioral map instead of separate PDFs.',
+                'outcome': 'Intelligence becomes easier to consume, explain, and act on.',
+                'value': 'Bridges a longstanding gap between CTI production and defensive execution.'},
+               {'id': 5,
+                'title': 'Security Architecture',
+                'challenge': 'Architects need control decisions grounded in relevant threat behavior, '
+                             'not generic assumptions.',
+                'how_used': 'Filter by sector, geography, software, access vector, and breach type; '
+                            'study repeated behavior patterns to guide control placement.',
+                'what_changes': 'Design choices become behavior-informed and context-specific.',
+                'outcome': 'Prioritized investments in segmentation, hardening, monitoring, and '
+                           'resilience.',
+                'value': 'Makes architecture decisions more evidence-driven and defensible.'},
+               {'id': 6,
+                'title': 'Executive / CISO Briefing',
+                'challenge': 'Leadership needs relevance and implications without reading many '
+                             'technical reports.',
+                'how_used': 'Use Operational Priorities + Documents, then present recurring techniques '
+                            'and representative attack paths tied to readiness implications.',
+                'what_changes': 'Threat intel is translated into concise decision-support material.',
+                'outcome': 'CISO sees structured attacker behavior, not disconnected headlines.',
+                'value': 'Supports better questions on coverage, gaps, and risk priorities.'},
+               {'id': 7,
+                'title': 'Purple Team Exercises',
+                'challenge': 'Exercises often rely on abstract ATT&CK plans that are not tied to '
+                             'current incidents.',
+                'how_used': 'Choose a real mapped incident, emulate its ATT&CK chain, and validate '
+                            'blue-team detections and response actions via Hunt Pack.',
+                'what_changes': 'Exercises are grounded in realistic intrusion behavior.',
+                'outcome': 'Higher fidelity validation of readiness and cross-team alignment.',
+                'value': 'Improves realism and operational relevance of purple teaming.'},
+               {'id': 8,
+                'title': 'Vulnerability Prioritization',
+                'challenge': 'VM teams are overloaded with CVEs and struggle to rank operational '
+                             'relevance.',
+                'how_used': 'Pivot from mapped incidents to related CVEs and ATT&CK behaviors (initial '
+                            'access, execution, escalation, lateral movement, exfiltration).',
+                'what_changes': 'Prioritization becomes behavior-aware, not score-only.',
+                'outcome': 'Remediation focuses on vulnerabilities tied to meaningful attacker '
+                           'workflows.',
+                'value': 'Improves threat-informed vulnerability management decisions.'},
+               {'id': 9,
+                'title': 'Analyst Training & Development',
+                'challenge': 'Junior analysts may know indicators but struggle to reason through '
+                             'attacker workflows end-to-end.',
+                'how_used': 'Mentors use real incidents to walk through mapped techniques, highlighted '
+                            'chain, Attack Path, Hunt Pack, and investigative pivots.',
+                'what_changes': 'Learning shifts from abstract concepts to guided operational '
+                                'workflow.',
+                'outcome': 'Analysts build stronger tactics/techniques/stages/pivot reasoning.',
+                'value': 'Supports capability building beyond day-to-day operations.'},
+               {'id': 10,
+                'title': 'Sector-Specific Intelligence',
+                'challenge': 'Teams often consume broad global intelligence that lacks local '
+                             'relevance.',
+                'how_used': 'Filter by sector, geography, software, access vector, and breach type to '
+                            'expose context-relevant behavior patterns.',
+                'what_changes': 'Awareness shifts from generic noise to specific risk context.',
+                'outcome': 'Clearer understanding of likely threats and behaviors to monitor.',
+                'value': 'Improves practical focus and operational prioritization.'}],
+     'deeper_value': ['Reduces fragmentation by organizing incidents into a common behavioral '
+                      'structure.',
+                      'Makes ATT&CK operational against real incidents, not just conceptual.',
+                      'Shortens time from intelligence consumption to defensive action.',
+                      'Supports multiple teams: SOC, IR, CTI, engineering, architecture, leadership, '
+                      'and training.',
+                      'Turns intelligence from static reading into a living operational knowledge '
+                      'system.']}
+
+def _load_case_studies_payload() -> Dict[str, Any]:
+    path = os.path.join(app.root_path, "static", "case_studies.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+        if isinstance(payload, dict):
+            return payload
+    except Exception:
+        pass
+    return _default_case_studies_payload()
+
+
 # ------------------------------------------------------------
 # Routes
 # ------------------------------------------------------------
 @app.get("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", case_studies_seed=_load_case_studies_payload())
 
 
 @app.get("/healthz")
@@ -816,6 +949,15 @@ def api_bootstrap():
 
     return jsonify(payload)
 
+
+
+
+@app.get("/api/case_studies")
+def api_case_studies():
+    payload = _load_case_studies_payload()
+    if payload.get("cases"):
+        return jsonify(payload)
+    return jsonify(payload), 200
 
 @app.get("/api/heartbeat")
 def api_heartbeat():
