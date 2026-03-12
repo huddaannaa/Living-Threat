@@ -3805,9 +3805,10 @@ function renderMatrix(docs, techStats, selDoc){
       return `<button class="${cls}" data-tac="${escapeHtml(tac)}">${escapeHtml(shortTitle(tac, 16))} (${cnt})</button>`;
     }).join("");
     nav.querySelectorAll("[data-tac]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const el = $(tacticDomId(btn.getAttribute("data-tac")));
-        if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+      btn.addEventListener("click", (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        scrollMatrixToTactic(btn.getAttribute("data-tac"));
       });
     });
   }
@@ -4358,6 +4359,16 @@ function loadHash(){
 }
 window.addEventListener("hashchange", ()=>{ loadHash(); render(); });
 window.addEventListener("resize", ()=>{ if(state.pathOn || (state.huntOn && state.selectedDocId)) render(); });
+
+function scrollMatrixToTactic(tacticName){
+  const matrixBody = $("matrixPanel")?.querySelector(".matrixBody");
+  const target = $(tacticDomId(tacticName));
+  if(!matrixBody || !target) return;
+  const bodyRect = matrixBody.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const desiredTop = Math.max(0, matrixBody.scrollTop + (targetRect.top - bodyRect.top) - 14);
+  matrixBody.scrollTo({ top: desiredTop, behavior: "smooth" });
+}
 
 /* Minimap */
 function scrollMiniTarget(targetId){
