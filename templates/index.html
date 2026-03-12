@@ -107,11 +107,13 @@
       backdrop-filter: blur(10px);
     }
     .topbarInner{
+      position:relative;
       padding:12px clamp(14px, 2vw, 28px);
+      padding-right: 420px;
       display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
     }
 
-    .topNavActions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-left:auto; justify-content:flex-end; }
+    .topNavActions{ position:absolute; top:12px; right:clamp(14px, 2vw, 28px); display:flex; align-items:center; gap:8px; flex-wrap:nowrap; justify-content:flex-end; }
     .topNavActions .btn{ white-space:nowrap; }
     .moreMenu{ position:relative; }
     .moreMenu > summary{ list-style:none; }
@@ -137,7 +139,7 @@
     }
     .brand .sub{ color:rgba(214,247,255,.68); font-size:12px; line-height:1.25; max-width: 980px; }
 
-    .bar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; min-width:520px; }
+    .bar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; min-width:520px; margin-left:auto; }
 
     .ctl, .rangeCtl, .toggle{
       display:flex; align-items:center; gap:8px;
@@ -301,10 +303,10 @@
     }
 
     @media (max-width: 860px){
-      .topbarInner{ padding:10px 12px; }
+      .topbarInner{ padding:10px 12px; padding-right:12px; }
       .brand{ min-width:0; width:100%; }
       .brand .sub{ font-size:11px; }
-      .topNavActions{ width:100%; }
+      .topNavActions{ position:static; width:100%; flex-wrap:wrap; }
       .morePanel{ right:0; left:auto; }
       .bar{
         min-width:0;
@@ -409,8 +411,8 @@
     }
     .matrixNavMap{
       position: sticky;
-      top: 0;
-      z-index: 6;
+      top: 12px;
+      z-index: 26;
       border:1px solid rgba(0,245,255,.16);
       background: rgba(2,12,18,.60);
       border-radius: 12px;
@@ -1542,16 +1544,6 @@
       </div>
 
       <div class="bar">
-        <div class="toggle" title="Hunt Mode highlights techniques used by the selected document">
-          <input type="checkbox" id="hunt" checked />
-          <span>Hunt Mode</span>
-        </div>
-
-        <div class="toggle" title="Auto-check polls a small heartbeat every 60s. It does not auto-refresh the full dataset.">
-          <input type="checkbox" id="autoCheck" checked />
-          <span>Auto-check</span>
-        </div>
-
         <button class="btn secondary mobileOnly" id="docsBtn">Docs</button>
         <button class="btn secondary mobileOnly" id="actionsBtn">Actions</button>
         <button class="btn secondary mobileOnly" id="jumpBtn">Jump</button>
@@ -3093,7 +3085,6 @@ function renderOperationalPriorities(docs){
     item.addEventListener("click", ()=>{
       toggleDocSelection(d.id, { renderNow:false });
       state.huntOn = true;
-      $("hunt").checked = true;
       syncHash();
       render();
     });
@@ -3876,7 +3867,6 @@ function openDocModal(doc){
   $("selectDocForHunt").addEventListener("click", ()=>{
     toggleDocSelection(doc.id, { renderNow:false });
     state.huntOn = true;
-    $("hunt").checked = true;
     syncHash();
     render();
     $("docModal").close();
@@ -3969,7 +3959,6 @@ function renderSwitcher(){
     el.addEventListener("click", ()=>{
       toggleDocSelection(d.id, { renderNow:false });
       state.huntOn = true;
-      $("hunt").checked = true;
       syncHash();
       render();
       $("switcherModal").close();
@@ -4173,12 +4162,6 @@ $("sectorF").addEventListener("change", ()=>{ state.sector = $("sectorF").value;
 $("softwareF").addEventListener("change", ()=>{ state.software = $("softwareF").value; syncHash(); render(); if(tourActive) renderTour(); });
 $("accessVectorF").addEventListener("change", ()=>{ state.accessVector = $("accessVectorF").value; syncHash(); render(); if(tourActive) renderTour(); });
 
-$("hunt").addEventListener("change", ()=>{
-  state.huntOn = $("hunt").checked;
-  if(!state.huntOn) state.pathOn = false;
-  syncHash(); render();
-});
-
 $("toggleCardsBtn").addEventListener("click", ()=>{
   state.cardDocsExpanded = !state.cardDocsExpanded;
   render();
@@ -4207,12 +4190,6 @@ $("newBadge").addEventListener("click", async ()=>{
   toast("Refreshed");
 });
 
-$("autoCheck").addEventListener("change", ()=>{
-  state.autoCheck = $("autoCheck").checked;
-  toast(state.autoCheck ? "Auto-check enabled" : "Auto-check disabled");
-  if(state.autoCheck) startHeartbeat(); else stopHeartbeat();
-});
-
 $("clearAll").addEventListener("click", ()=>{
   location.hash = "";
   Object.assign(state, {
@@ -4224,7 +4201,7 @@ $("clearAll").addEventListener("click", ()=>{
     pathPinned:true,
     packOn:false,
     sideTab:"focus",
-    autoCheck: $("autoCheck").checked,
+    autoCheck: true,
     newCount: 0,
     cardDocsExpanded: false,
   });
@@ -4232,7 +4209,6 @@ $("clearAll").addEventListener("click", ()=>{
   $("rangeV").textContent = "7d";
   $("sev").value = "ALL";
   $("q").value = "";
-  $("hunt").checked = true;
   setPresetActive("7");
   setNewDocs(0);
   syncHash();
@@ -4335,7 +4311,7 @@ function syncHash(){
   p.set("sec", state.sector);
   p.set("sw", state.software);
   p.set("av", state.accessVector);
-  p.set("hunt", state.huntOn ? "1" : "0");
+  p.set("hunt", "1");
   p.set("path", state.pathOn ? "1" : "0");
   p.set("pathpin", state.pathPinned ? "1" : "0");
   p.set("pack", state.packOn ? "1" : "0");
@@ -4357,7 +4333,7 @@ function loadHash(){
   state.sector = p.get("sec") || "ALL";
   state.software = p.get("sw") || "ALL";
   state.accessVector = p.get("av") || "ALL";
-  state.huntOn = (p.get("hunt") || "1") === "1";
+  state.huntOn = true;
   state.pathOn = (p.get("path") || "0") === "1";
   state.pathPinned = (p.get("pathpin") || "1") === "1";
   if(state.pathOn) state.pathPinned = true;
@@ -4370,7 +4346,6 @@ function loadHash(){
 
   $("sev").value = state.sevMin;
   $("q").value = state.q;
-  $("hunt").checked = state.huntOn;
 
   if(state.allTime){
     $("rangeV").textContent = "ALL";
@@ -4445,7 +4420,8 @@ setMiniActiveByScroll();
     await showIntroMessageGate();
     if(getWorkflowAutoStart()) startTour();
   }
-  if(state.autoCheck) startHeartbeat();
+  state.autoCheck = true;
+  startHeartbeat();
 })();
 </script>
 </body>
